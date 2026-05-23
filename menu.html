@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu – Zestora</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/menu.css">
 </head>
@@ -13,12 +14,12 @@
   <div class="page-transition"></div>
   <div class="scroll-progress"></div>
 
-  <nav class="nav glass visible">
+  <nav class="nav scrolled">
     <a href="index.html" class="nav-logo">Zestora</a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="menu.html">Menu</a></li>
-      <li><a href="booking.html">Book</a></li>
+      <li><a href="booking.html">Reserve</a></li>
     </ul>
     <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -26,20 +27,21 @@
   <div class="mobile-menu">
     <a href="index.html">Home</a>
     <a href="menu.html">Menu</a>
-    <a href="booking.html">Book</a>
+    <a href="booking.html">Reserve</a>
   </div>
 
   <main class="menu-page">
     <div class="menu-header">
-      <h1>Our Menu</h1>
-      <p>Handcrafted with love, served with a smile</p>
+      <div class="eyebrow"><span>The full list</span></div>
+      <h1>Our <em>menu</em></h1>
+      <p>Handcrafted in micro-batches. Refreshed each season.</p>
     </div>
 
     <div class="category-tabs">
-      <button class="tab-btn active" data-category="coffee">☕ Coffee</button>
-      <button class="tab-btn" data-category="food">🥗 Food</button>
-      <button class="tab-btn" data-category="drinks">🥤 Drinks</button>
-      <button class="tab-btn" data-category="desserts">🍰 Desserts</button>
+      <button class="tab-btn active" data-category="coffee">Coffee</button>
+      <button class="tab-btn" data-category="food">Kitchen</button>
+      <button class="tab-btn" data-category="drinks">Cold</button>
+      <button class="tab-btn" data-category="desserts">Sweet</button>
     </div>
 
     <div class="menu-grid"></div>
@@ -62,11 +64,14 @@
 
   <footer class="footer">
     <div class="footer-grid">
-      <div><h3>Zestora</h3><p>Fresh. Bold. Alive.</p></div>
-      <div><h3>Hours</h3><ul><li>Mon–Fri: 7am – 9pm</li><li>Sat: 8am – 10pm</li><li>Sun: 8am – 8pm</li></ul></div>
-      <div><h3>Contact</h3><ul><li>123 Green Lane</li><li>hello@zestora.cafe</li></ul></div>
+      <div>
+        <div class="footer-brand">Zestora</div>
+        <p>Slow brewed. Deeply felt.</p>
+      </div>
+      <div><h3>Hours</h3><ul><li>Mon–Fri · 7am – 9pm</li><li>Sat · 8am – 10pm</li><li>Sun · 8am – 8pm</li></ul></div>
+      <div><h3>Visit</h3><ul><li>123 Green Lane</li><li>hello@zestora.cafe</li></ul></div>
     </div>
-    <div class="footer-bottom"><p>&copy; 2026 Zestora.</p></div>
+    <div class="footer-bottom"><p>© 2026 Zestora — All rights reserved</p></div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>

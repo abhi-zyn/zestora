@@ -24,7 +24,7 @@
       return;
     }
     reservationsList.innerHTML = bookings.map(b => `
-      <div class="reservation-card glass-sm">
+      <div class="reservation-card">
         <div class="res-info">
           <h4>${b.name}</h4>
           <p>${b.guests} guests · ${b.time}</p>
@@ -71,7 +71,7 @@
     const container = document.querySelector('.confirmation-confetti');
     if (!container) return;
     container.innerHTML = '';
-    const colors = ['#A8FF3E', '#D4FF00', '#7BC67E', '#F0FF61', '#C8F5C0'];
+    const colors = ['#c9a961', '#e2bd78', '#f5e8d3', '#d97742', '#4a7a5a'];
     for (let i = 0; i < 30; i++) {
       const piece = document.createElement('div');
       piece.className = 'confetti-piece';

@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book a Table – Zestora</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/booking.css">
 </head>
@@ -13,12 +14,12 @@
   <div class="page-transition"></div>
   <div class="scroll-progress"></div>
 
-  <nav class="nav glass visible">
+  <nav class="nav scrolled">
     <a href="index.html" class="nav-logo">Zestora</a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="menu.html">Menu</a></li>
-      <li><a href="booking.html">Book</a></li>
+      <li><a href="booking.html">Reserve</a></li>
     </ul>
     <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -26,16 +27,17 @@
   <div class="mobile-menu">
     <a href="index.html">Home</a>
     <a href="menu.html">Menu</a>
-    <a href="booking.html">Book</a>
+    <a href="booking.html">Reserve</a>
   </div>
 
   <main class="booking-page">
     <div class="booking-header">
-      <h1>Book a Table</h1>
-      <p>Reserve your spot at Zestora</p>
+      <div class="eyebrow"><span>Save your seat</span></div>
+      <h1>Reserve a <em>table</em></h1>
+      <p>A quiet corner, a slow cup, your name on the door.</p>
     </div>
 
-    <div class="booking-form-wrapper glass">
+    <div class="booking-form-wrapper">
       <form id="booking-form">
         <div class="form-group">
           <label for="name">Full Name</label>
@@ -94,26 +96,29 @@
       </form>
     </div>
 
-    <div class="booking-confirmation glass" style="position:relative;">
+    <div class="booking-confirmation" style="position:relative;">
       <div class="confirmation-confetti"></div>
       <div class="confirmation-check">✓</div>
-      <h2>You're all set!</h2>
-      <p>We've saved your reservation. See you soon!</p>
+      <h2>You're all <em>set</em></h2>
+      <p>We've saved your reservation. We'll see you soon.</p>
     </div>
 
     <div class="reservations-section">
-      <h2>Your Reservations</h2>
+      <h2>Your reservations</h2>
       <div class="reservations-list"></div>
     </div>
   </main>
 
   <footer class="footer">
     <div class="footer-grid">
-      <div><h3>Zestora</h3><p>Fresh. Bold. Alive.</p></div>
-      <div><h3>Hours</h3><ul><li>Mon–Fri: 7am – 9pm</li><li>Sat: 8am – 10pm</li><li>Sun: 8am – 8pm</li></ul></div>
-      <div><h3>Contact</h3><ul><li>123 Green Lane</li><li>hello@zestora.cafe</li></ul></div>
+      <div>
+        <div class="footer-brand">Zestora</div>
+        <p>Slow brewed. Deeply felt.</p>
+      </div>
+      <div><h3>Hours</h3><ul><li>Mon–Fri · 7am – 9pm</li><li>Sat · 8am – 10pm</li><li>Sun · 8am – 8pm</li></ul></div>
+      <div><h3>Visit</h3><ul><li>123 Green Lane</li><li>hello@zestora.cafe</li></ul></div>
     </div>
-    <div class="footer-bottom"><p>&copy; 2026 Zestora.</p></div>
+    <div class="footer-bottom"><p>© 2026 Zestora — All rights reserved</p></div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>

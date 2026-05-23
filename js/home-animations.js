@@ -1,67 +1,198 @@
-/* ===== Home Page Animations ===== */
-(function() {
+/* ===== Home Page — Cinematic Animations ===== */
+(function () {
   const isMobile = window.innerWidth < 768;
 
-  // --- Hero entrance ---
-  const heroTl = gsap.timeline({ delay: 0.3 });
-  heroTl
-    .from('.hero-title', { y: 60, opacity: 0, duration: 1, ease: 'power3.out' })
-    .from('.hero-tagline', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
-    .from('.hero-cta .btn', { y: 20, opacity: 0, stagger: 0.15, duration: 0.6 }, '-=0.4');
+  // -----------------------------
+  // Nav scrolled state
+  // -----------------------------
+  const nav = document.querySelector('.nav');
+  ScrollTrigger.create({
+    start: 'top -50',
+    end: 99999,
+    onUpdate: (self) => {
+      nav.classList.toggle('scrolled', self.scroll() > 50);
+    }
+  });
+  nav.classList.add('visible');
 
-  // Floating ingredients entrance + idle
-  const ingredients = document.querySelectorAll('.hero-ingredient');
-  ingredients.forEach((el, i) => {
-    const xStart = (Math.random() - 0.5) * (isMobile ? 200 : 400);
-    const yStart = (Math.random() - 0.5) * (isMobile ? 200 : 400);
-    gsap.fromTo(el,
-      { x: xStart, y: yStart, scale: 0, opacity: 0, rotation: Math.random() * 180 - 90 },
-      { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, duration: 1.2, delay: 0.5 + i * 0.12, ease: 'back.out(1.4)' }
-    );
-    // Idle float
+  // -----------------------------
+  // Hero entrance
+  // -----------------------------
+  const heroTl = gsap.timeline({ delay: 0.2 });
+  heroTl
+    .from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out' })
+    .from('.hero-title', { opacity: 0, y: 50, duration: 1.2, ease: 'power4.out' }, '-=0.4')
+    .from('.hero-tagline', { opacity: 0, y: 20, duration: 0.9, ease: 'power3.out' }, '-=0.7')
+    .from('.hero-cta .btn', { opacity: 0, y: 20, stagger: 0.12, duration: 0.6, ease: 'power3.out' }, '-=0.5')
+    .from('.scroll-cue', { opacity: 0, duration: 0.8 }, '-=0.3');
+
+  // Bokeh idle drift
+  gsap.utils.toArray('.hero-bokeh').forEach((el, i) => {
     gsap.to(el, {
-      y: `+=${10 + Math.random() * 15}`,
-      rotation: `+=${5 + Math.random() * 10}`,
-      duration: 2.5 + Math.random() * 1.5,
+      x: (Math.random() - 0.5) * 60,
+      y: (Math.random() - 0.5) * 60,
+      duration: 8 + Math.random() * 4,
       repeat: -1,
       yoyo: true,
       ease: 'sine.inOut',
-      delay: 1.5 + i * 0.2
+      delay: i * 0.5
     });
   });
 
-  // --- Coffee Frame Animation ---
+  // Hero parallax fade on scroll
+  gsap.to('.hero-content', {
+    y: -80,
+    opacity: 0,
+    scrollTrigger: {
+      trigger: '.hero',
+      start: 'top top',
+      end: 'bottom top',
+      scrub: 1
+    }
+  });
+
+  // -----------------------------
+  // Coffee Frame Animation (canvas)
+  // -----------------------------
   const canvas = document.getElementById('coffee-canvas');
   const ctx = canvas.getContext('2d');
   const frameCount = 240;
   const coffeeFrames = [];
   const coffeeAnim = { frame: 0 };
+  let loaded = 0;
+  const loaderEl = document.getElementById('coffee-loader');
+  const loaderFill = document.getElementById('coffee-loader-fill');
+  const progressEl = document.getElementById('coffee-progress');
+  const stageEl = document.getElementById('coffee-stage');
 
-  function resizeCoffeeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+  // Stage labels — change as scroll progresses
+  const stages = [
+    { at: 0.0,  num: '01', label: 'The pour' },
+    { at: 0.30, num: '02', label: 'The bloom' },
+    { at: 0.60, num: '03', label: 'The crema' },
+    { at: 0.85, num: '04', label: 'The first sip' }
+  ];
+
+  function setCanvasSize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
   }
-  resizeCoffeeCanvas();
-  window.addEventListener('resize', resizeCoffeeCanvas);
+  setCanvasSize();
+  window.addEventListener('resize', () => {
+    setCanvasSize();
+    renderCoffeeFrame();
+  });
+
+  // Preload — show progress
+  function imgLoaded() {
+    loaded++;
+    const pct = Math.round((loaded / frameCount) * 100);
+    if (loaderFill) loaderFill.style.width = pct + '%';
+    // Render first usable frame as soon as it arrives
+    if (loaded === 1 || loaded === Math.floor(frameCount / 4)) {
+      renderCoffeeFrame();
+    }
+    // Hide loader once enough frames are buffered
+    if (loaded >= Math.min(40, frameCount)) {
+      loaderEl && loaderEl.classList.add('hidden');
+    }
+  }
 
   for (let i = 1; i <= frameCount; i++) {
     const img = new Image();
+    img.onload = imgLoaded;
+    img.onerror = imgLoaded;
     img.src = `images/coffee/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
     coffeeFrames.push(img);
   }
 
+  // Render a single frame with watermark crop + cinematic vignette
   function renderCoffeeFrame() {
-    const img = coffeeFrames[Math.round(coffeeAnim.frame)];
-    if (!img || !img.complete) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-    const x = (canvas.width - img.width * scale) / 2;
-    const y = (canvas.height - img.height * scale) / 2;
-    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    const idx = Math.min(frameCount - 1, Math.max(0, Math.round(coffeeAnim.frame)));
+    const img = coffeeFrames[idx];
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+
+    if (!img || !img.complete || !img.naturalWidth) {
+      // Fall back to nearest loaded frame
+      let near = null;
+      for (let d = 1; d < frameCount; d++) {
+        const a = coffeeFrames[idx - d], b = coffeeFrames[idx + d];
+        if (a && a.complete && a.naturalWidth) { near = a; break; }
+        if (b && b.complete && b.naturalWidth) { near = b; break; }
+      }
+      if (!near) return;
+      drawFrame(near, w, h);
+      return;
+    }
+    drawFrame(img, w, h);
+
+    // Update progress text
+    if (progressEl) {
+      progressEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + frameCount;
+    }
   }
 
-  coffeeFrames[0].onload = renderCoffeeFrame;
+  function drawFrame(img, w, h) {
+    ctx.clearRect(0, 0, w, h);
 
+    // Crop bottom strip (~7%) to remove "Veo" watermark
+    const cropBottom = Math.floor(img.naturalHeight * 0.07);
+    const sw = img.naturalWidth;
+    const sh = img.naturalHeight - cropBottom;
+
+    // Cover-fit
+    const scale = Math.max(w / sw, h / sh);
+    const drawW = sw * scale;
+    const drawH = sh * scale;
+    const dx = (w - drawW) / 2;
+    const dy = (h - drawH) / 2;
+
+    ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
+
+    // Cinematic vignette (also helps any residual watermark blend in)
+    const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+    grad.addColorStop(0, 'rgba(7, 9, 10, 0)');
+    grad.addColorStop(0.7, 'rgba(7, 9, 10, 0.35)');
+    grad.addColorStop(1, 'rgba(7, 9, 10, 0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Bottom gradient for text legibility + extra watermark hide
+    const bottomGrad = ctx.createLinearGradient(0, h * 0.55, 0, h);
+    bottomGrad.addColorStop(0, 'rgba(7, 9, 10, 0)');
+    bottomGrad.addColorStop(1, 'rgba(7, 9, 10, 0.7)');
+    ctx.fillStyle = bottomGrad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  // Update stage label based on progress
+  let currentStage = -1;
+  function updateStage(progress) {
+    let next = 0;
+    for (let i = stages.length - 1; i >= 0; i--) {
+      if (progress >= stages[i].at) { next = i; break; }
+    }
+    if (next !== currentStage) {
+      currentStage = next;
+      const s = stages[next];
+      gsap.to(stageEl, {
+        opacity: 0, y: 10, duration: 0.3, ease: 'power2.in',
+        onComplete: () => {
+          stageEl.innerHTML = `<span class="num">Chapter ${s.num}</span>${s.label}`;
+          gsap.to(stageEl, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+        }
+      });
+    }
+  }
+
+  // Initial stage visible
+  gsap.set(stageEl, { opacity: 1, y: 0 });
+
+  // Scroll-driven frame scrub
   gsap.to(coffeeAnim, {
     frame: frameCount - 1,
     snap: 'frame',
@@ -70,70 +201,134 @@
       trigger: '.section-coffee',
       pin: true,
       start: 'top top',
-      end: '+=200%',
-      scrub: 0.5
+      end: '+=250%',
+      scrub: 0.4,
+      onUpdate: (self) => updateStage(self.progress)
     },
     onUpdate: renderCoffeeFrame
   });
 
-  gsap.from('.section-coffee .section-label', {
-    opacity: 0, y: -30,
-    scrollTrigger: { trigger: '.section-coffee', start: 'top 80%' }
-  });
+  // -----------------------------
+  // Story section — mini canvas mirrors the coffee frame
+  // -----------------------------
+  const storyCanvas = document.getElementById('story-canvas');
+  if (storyCanvas) {
+    const sctx = storyCanvas.getContext('2d');
+    const storyAnim = { frame: 100 };
 
-  // --- Bowl Assembly Section ---
-  const bowlTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '.section-bowl',
-      pin: true,
-      start: 'top top',
-      end: '+=150%',
-      scrub: 1
+    function sizeStoryCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      storyCanvas.width = storyCanvas.offsetWidth * dpr;
+      storyCanvas.height = storyCanvas.offsetHeight * dpr;
+      sctx.setTransform(1, 0, 0, 1, 0, 0);
+      sctx.scale(dpr, dpr);
     }
-  });
+    sizeStoryCanvas();
+    window.addEventListener('resize', () => {
+      sizeStoryCanvas();
+      renderStoryFrame();
+    });
 
-  bowlTl
-    .from('.section-bowl .section-label', { opacity: 0, y: -30, duration: 0.3 })
-    .from('.bowl-plate', { scale: 0, opacity: 0, duration: 0.4, ease: 'back.out(1.7)' })
-    .from('.bowl-rice', { y: -200, opacity: 0, duration: 0.3, ease: 'back.out(1.4)' })
-    .from('.bowl-avocado', { x: isMobile ? -150 : -300, opacity: 0, rotation: -45, duration: 0.3, ease: 'back.out(1.7)' })
-    .from('.bowl-tomato', { x: isMobile ? 150 : 300, opacity: 0, rotation: 30, duration: 0.3, ease: 'back.out(1.7)' })
-    .from('.bowl-greens', { y: -200, x: -100, opacity: 0, duration: 0.3, ease: 'back.out(1.4)' })
-    .from('.bowl-seeds', { y: -150, opacity: 0, scale: 0.3, stagger: 0.05, duration: 0.2, ease: 'power2.out' })
-    .from('.bowl-sauce', { scaleX: 0, opacity: 0, transformOrigin: 'left', duration: 0.4, ease: 'power2.out' });
+    function renderStoryFrame() {
+      const idx = Math.min(frameCount - 1, Math.max(0, Math.round(storyAnim.frame)));
+      const img = coffeeFrames[idx];
+      const w = storyCanvas.offsetWidth;
+      const h = storyCanvas.offsetHeight;
+      if (!img || !img.complete || !img.naturalWidth) return;
 
-  // --- Drinks Assembly Section ---
-  const drinksTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '.section-drinks',
-      pin: true,
-      start: 'top top',
-      end: '+=150%',
-      scrub: 1
+      sctx.clearRect(0, 0, w, h);
+      const cropBottom = Math.floor(img.naturalHeight * 0.07);
+      const sw = img.naturalWidth;
+      const sh = img.naturalHeight - cropBottom;
+      const scale = Math.max(w / sw, h / sh);
+      const drawW = sw * scale;
+      const drawH = sh * scale;
+      const dx = (w - drawW) / 2;
+      const dy = (h - drawH) / 2;
+      sctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
+
+      // Subtle vignette
+      const grad = sctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.4, w / 2, h / 2, Math.max(w, h) * 0.7);
+      grad.addColorStop(0, 'rgba(7,9,10,0)');
+      grad.addColorStop(1, 'rgba(7,9,10,0.5)');
+      sctx.fillStyle = grad;
+      sctx.fillRect(0, 0, w, h);
     }
-  });
 
-  drinksTl
-    .from('.section-drinks .section-label', { opacity: 0, y: -30, duration: 0.3 })
-    .from('.drink-glass', { scale: 0, opacity: 0, duration: 0.4, ease: 'back.out(1.7)' })
-    .from('.drink-ice', { y: -300, opacity: 0, stagger: 0.08, duration: 0.3, ease: 'bounce.out' })
-    .from('.drink-liquid', { scaleY: 0, transformOrigin: 'bottom', opacity: 0, duration: 0.4, ease: 'power2.out' })
-    .from('.drink-fruit', { x: () => (Math.random() > 0.5 ? 200 : -200), opacity: 0, rotation: 90, stagger: 0.1, duration: 0.3, ease: 'back.out(1.7)' })
-    .from('.drink-straw', { y: -200, opacity: 0, duration: 0.3, ease: 'power2.out' })
-    .from('.drink-bubbles', { opacity: 0, y: 20, stagger: 0.05, duration: 0.2 });
+    // Slow ambient loop for story canvas
+    gsap.to(storyAnim, {
+      frame: 220,
+      duration: 18,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+      onUpdate: renderStoryFrame
+    });
 
-  // --- CTA Section entrance ---
-  gsap.from('.cta-card', {
-    y: 60,
+    // Try render once frames load
+    const renderInterval = setInterval(() => {
+      if (coffeeFrames[100] && coffeeFrames[100].complete) {
+        renderStoryFrame();
+        clearInterval(renderInterval);
+      }
+    }, 200);
+  }
+
+  // -----------------------------
+  // Story text reveal
+  // -----------------------------
+  gsap.from('.story-text > *', {
     opacity: 0,
-    stagger: 0.2,
+    y: 30,
+    stagger: 0.1,
+    duration: 0.9,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
+  });
+  gsap.from('.story-visual', {
+    opacity: 0,
+    scale: 0.95,
+    duration: 1.2,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
+  });
+
+  // -----------------------------
+  // Menu cards reveal
+  // -----------------------------
+  gsap.from('.section-head > *', {
+    opacity: 0,
+    y: 30,
+    stagger: 0.1,
     duration: 0.8,
     ease: 'power3.out',
-    scrollTrigger: { trigger: '.cta-section', start: 'top 80%' }
+    scrollTrigger: { trigger: '.menu-preview', start: 'top 75%' }
+  });
+  gsap.from('.menu-feature-card', {
+    opacity: 0,
+    y: 40,
+    stagger: 0.08,
+    duration: 0.8,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.menu-cards', start: 'top 80%' }
   });
 
-  // --- Dot navigation ---
-  const sections = ['.hero', '.section-coffee', '.section-bowl', '.section-drinks', '.cta-section'];
+  // -----------------------------
+  // CTA reveal
+  // -----------------------------
+  gsap.from('.cta-section .cta-inner > *', {
+    opacity: 0,
+    y: 30,
+    stagger: 0.1,
+    duration: 0.9,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.cta-section', start: 'top 75%' }
+  });
+
+  // -----------------------------
+  // Dot navigation
+  // -----------------------------
+  const sections = ['.hero', '.section-coffee', '.story-section', '.menu-preview', '.cta-section'];
   const dots = document.querySelectorAll('.dot-nav .dot');
   sections.forEach((sel, i) => {
     ScrollTrigger.create({
@@ -144,8 +339,38 @@
       onEnterBack: () => setActiveDot(i)
     });
   });
-
   function setActiveDot(index) {
     dots.forEach((d, i) => d.classList.toggle('active', i === index));
+  }
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      const target = document.querySelector(dot.dataset.target);
+      if (target && window.lenis) window.lenis.scrollTo(target);
+      else if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // -----------------------------
+  // Scroll progress bar
+  // -----------------------------
+  const progressBar = document.querySelector('.scroll-progress');
+  ScrollTrigger.create({
+    start: 0,
+    end: 'max',
+    onUpdate: (self) => {
+      gsap.to(progressBar, { scaleX: self.progress, duration: 0.1, ease: 'none' });
+    }
+  });
+
+  // -----------------------------
+  // Mobile menu toggle
+  // -----------------------------
+  const hamburger = document.querySelector('.hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+    mobileMenu.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => mobileMenu.classList.remove('open'))
+    );
   }
 })();

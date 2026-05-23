@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zestora – Fresh. Bold. Alive.</title>
+  <title>Zestora — Slow Brewed. Deeply Felt.</title>
+  <meta name="description" content="A cinematic coffee experience. Single-origin beans, hand-crafted pours, served in moody twilight.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/home.css">
 </head>
@@ -13,12 +15,12 @@
   <div class="page-transition"></div>
   <div class="scroll-progress"></div>
 
-  <nav class="nav glass">
+  <nav class="nav">
     <a href="index.html" class="nav-logo">Zestora</a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="menu.html">Menu</a></li>
-      <li><a href="booking.html">Book</a></li>
+      <li><a href="booking.html">Reserve</a></li>
       <li><a href="#footer">Contact</a></li>
     </ul>
     <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -27,124 +29,228 @@
   <div class="mobile-menu">
     <a href="index.html">Home</a>
     <a href="menu.html">Menu</a>
-    <a href="booking.html">Book</a>
+    <a href="booking.html">Reserve</a>
     <a href="#footer">Contact</a>
   </div>
 
   <div class="dot-nav">
-    <div class="dot active"></div>
-    <div class="dot"></div>
-    <div class="dot"></div>
-    <div class="dot"></div>
-    <div class="dot"></div>
+    <div class="dot active" data-target=".hero"></div>
+    <div class="dot" data-target=".section-coffee"></div>
+    <div class="dot" data-target=".story-section"></div>
+    <div class="dot" data-target=".menu-preview"></div>
+    <div class="dot" data-target=".cta-section"></div>
   </div>
 
   <!-- HERO -->
   <section class="hero">
-    <svg class="hero-ingredient" style="top:15%;left:10%;width:60px" viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="22" ry="28" fill="#5D3A1A" opacity="0.9"/><path d="M20 20 Q30 10 40 20" stroke="#3D2210" fill="none" stroke-width="2"/></svg>
-    <svg class="hero-ingredient" style="top:20%;right:12%;width:55px" viewBox="0 0 60 60"><path d="M30 5 Q45 20 40 40 Q35 55 30 55 Q25 55 20 40 Q15 20 30 5Z" fill="#7BC67E"/><line x1="30" y1="15" x2="30" y2="50" stroke="#4A8B4A" stroke-width="1.5"/></svg>
-    <svg class="hero-ingredient" style="bottom:25%;left:15%;width:50px" viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="#FFE066"/><circle cx="30" cy="30" r="12" fill="#FFF3B0"/></svg>
-    <svg class="hero-ingredient" style="top:60%;right:18%;width:45px" viewBox="0 0 60 60"><circle cx="30" cy="30" r="18" fill="#E84040"/><circle cx="24" cy="24" r="3" fill="#FFB3B3" opacity="0.6"/></svg>
-    <svg class="hero-ingredient" style="bottom:15%;right:30%;width:40px" viewBox="0 0 60 60"><path d="M10 40 Q15 10 30 15 Q45 10 50 40 Q45 55 30 50 Q15 55 10 40Z" fill="#A8FF3E" opacity="0.8"/></svg>
-    <svg class="hero-ingredient" style="top:35%;left:25%;width:35px" viewBox="0 0 60 60"><path d="M30 10 Q50 30 30 50 Q10 30 30 10Z" fill="#C8F5C0" stroke="#7BC67E" stroke-width="2"/></svg>
+    <div class="hero-bokeh b1"></div>
+    <div class="hero-bokeh b2"></div>
+    <div class="hero-bokeh b3"></div>
 
     <div class="hero-content">
-      <h1 class="hero-title">Zestora</h1>
-      <p class="hero-tagline">Fresh. Bold. Alive.</p>
+      <div class="eyebrow hero-eyebrow"><span>Est. 2026 — Single Origin</span></div>
+      <h1 class="hero-title">
+        Slow brewed.<br>
+        <span class="accent">Deeply</span> felt.
+      </h1>
+      <p class="hero-tagline">
+        A cinematic coffee experience. Hand-poured single origins,
+        crafted with patience and served in warm twilight.
+      </p>
       <div class="hero-cta">
-        <a href="menu.html" class="btn btn-primary">Explore Menu</a>
-        <a href="booking.html" class="btn btn-outline">Book a Table</a>
+        <a href="menu.html" class="btn btn-primary">Explore the Menu</a>
+        <a href="booking.html" class="btn btn-outline">Reserve a Table</a>
       </div>
+    </div>
+
+    <div class="scroll-cue">
+      <span>Scroll</span>
+      <div class="scroll-cue-line"></div>
     </div>
   </section>
 
   <!-- COFFEE FRAME ANIMATION -->
-  <section class="assembly-section section-coffee">
-    <p class="section-label">Our Coffee Journey</p>
+  <section class="section-coffee">
     <canvas id="coffee-canvas"></canvas>
-  </section>
 
-  <!-- BOWL ASSEMBLY -->
-  <section class="assembly-section section-bowl">
-    <p class="section-label">Crafted Bowls</p>
-    <div class="assembly-canvas">
-      <svg class="assembly-item bowl-plate" style="top:45%;left:50%;transform:translate(-50%,-50%);width:220px" viewBox="0 0 220 120">
-        <ellipse cx="110" cy="70" rx="105" ry="45" fill="#FFF" stroke="#E0E0E0" stroke-width="2"/>
-        <ellipse cx="110" cy="60" rx="90" ry="35" fill="#FAFAFA"/>
-      </svg>
-      <svg class="assembly-item bowl-rice" style="top:40%;left:50%;transform:translateX(-50%);width:120px" viewBox="0 0 120 50">
-        <ellipse cx="60" cy="30" rx="55" ry="20" fill="#FFF8DC"/>
-      </svg>
-      <svg class="assembly-item bowl-avocado" style="top:35%;left:25%;width:60px" viewBox="0 0 60 40">
-        <path d="M5 35 Q10 5 30 5 Q50 5 55 35 Z" fill="#7BC67E"/><path d="M15 30 Q20 10 30 10 Q40 10 45 30 Z" fill="#A8D86E"/>
-      </svg>
-      <svg class="assembly-item bowl-tomato" style="top:35%;right:25%;width:50px" viewBox="0 0 50 50">
-        <circle cx="25" cy="28" r="18" fill="#E84040"/><path d="M20 12 Q25 8 30 12" stroke="#4CAF50" fill="none" stroke-width="2"/>
-      </svg>
-      <svg class="assembly-item bowl-greens" style="top:30%;left:40%;width:70px" viewBox="0 0 70 40">
-        <path d="M5 35 Q15 5 35 10 Q55 5 65 35" fill="#4CAF50" opacity="0.8"/>
-      </svg>
-      <svg class="assembly-item bowl-seeds" style="top:42%;left:55%;width:40px" viewBox="0 0 40 30">
-        <circle cx="8" cy="10" r="3" fill="#D4A574"/><circle cx="20" cy="8" r="2.5" fill="#C49A6C"/><circle cx="32" cy="12" r="3" fill="#D4A574"/>
-      </svg>
-      <svg class="assembly-item bowl-sauce" style="top:44%;left:35%;width:100px" viewBox="0 0 100 20">
-        <path d="M5 10 Q25 5 50 12 Q75 18 95 8" stroke="#F4A460" fill="none" stroke-width="3" stroke-linecap="round"/>
-      </svg>
+    <div class="coffee-loader" id="coffee-loader">
+      <div class="coffee-loader-bar">
+        <div class="coffee-loader-fill" id="coffee-loader-fill"></div>
+        <div class="coffee-loader-text">Brewing the experience…</div>
+      </div>
+    </div>
+
+    <div class="coffee-overlay">
+      <div class="coffee-overlay-top">
+        <div class="coffee-stage" id="coffee-stage">
+          <span class="num">Chapter 01</span>
+          The pour
+        </div>
+      </div>
+      <div class="coffee-overlay-bottom">
+        <div class="coffee-tagline">
+          Watch each cup come alive — pour, bloom, sip.
+        </div>
+        <div class="coffee-progress" id="coffee-progress">00 / 240</div>
+      </div>
     </div>
   </section>
 
-  <!-- DRINKS ASSEMBLY -->
-  <section class="assembly-section section-drinks">
-    <p class="section-label">Fresh Drinks</p>
-    <div class="assembly-canvas">
-      <svg class="assembly-item drink-glass" style="top:25%;left:50%;transform:translateX(-50%);width:120px" viewBox="0 0 120 180">
-        <path d="M30 10 L35 165 Q60 175 85 165 L90 10 Z" fill="rgba(255,255,255,0.3)" stroke="#DDD" stroke-width="2"/>
-        <ellipse cx="60" cy="10" rx="30" ry="8" fill="rgba(255,255,255,0.2)" stroke="#DDD" stroke-width="2"/>
-      </svg>
-      <svg class="assembly-item drink-ice" style="top:35%;left:42%;width:30px" viewBox="0 0 30 30"><rect x="3" y="3" width="24" height="24" rx="4" fill="rgba(200,245,255,0.7)" stroke="#B0E0E6" stroke-width="1.5"/></svg>
-      <svg class="assembly-item drink-ice" style="top:40%;left:52%;width:25px" viewBox="0 0 30 30"><rect x="3" y="3" width="24" height="24" rx="4" fill="rgba(200,245,255,0.6)" stroke="#B0E0E6" stroke-width="1.5"/></svg>
-      <svg class="assembly-item drink-ice" style="top:38%;left:47%;width:28px" viewBox="0 0 30 30"><rect x="3" y="3" width="24" height="24" rx="4" fill="rgba(200,245,255,0.8)" stroke="#B0E0E6" stroke-width="1.5"/></svg>
-      <svg class="assembly-item drink-liquid" style="top:35%;left:50%;transform:translateX(-50%);width:90px" viewBox="0 0 90 120">
-        <path d="M8 5 L12 110 Q45 118 78 110 L82 5 Z" fill="#A8FF3E" opacity="0.7"/>
-      </svg>
-      <svg class="assembly-item drink-fruit" style="top:30%;left:38%;width:40px" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#FF6B35"/><circle cx="20" cy="20" r="10" fill="#FFB380"/></svg>
-      <svg class="assembly-item drink-fruit" style="top:45%;right:38%;width:35px" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#FFE066"/><circle cx="20" cy="20" r="10" fill="#FFF3B0"/></svg>
-      <svg class="assembly-item drink-straw" style="top:10%;left:55%;width:12px" viewBox="0 0 12 180">
-        <rect x="3" y="0" width="6" height="180" rx="3" fill="#A8FF3E"/>
-        <rect x="0" y="0" width="12" height="20" rx="3" fill="#7BC67E"/>
-      </svg>
-      <svg class="assembly-item drink-bubbles" style="top:50%;left:45%;width:60px" viewBox="0 0 60 80">
-        <circle cx="15" cy="60" r="4" fill="rgba(255,255,255,0.5)"/><circle cx="35" cy="50" r="3" fill="rgba(255,255,255,0.4)"/><circle cx="25" cy="35" r="5" fill="rgba(255,255,255,0.3)"/>
-      </svg>
+  <!-- STORY SECTION -->
+  <section class="story-section">
+    <div class="story-grid">
+      <div class="story-text">
+        <div class="eyebrow"><span>Our craft</span></div>
+        <h2>Coffee, treated as <em>ritual</em>.</h2>
+        <p>
+          We source beans from small farms across Ethiopia, Colombia, and Sumatra —
+          roasting in micro-batches the same morning they're served. Every cup is
+          poured by hand, timed by ear, and finished with intention.
+        </p>
+        <p>
+          You won't find rushed espresso here. Just deep, layered flavor and a
+          quiet space to taste it in.
+        </p>
+        <div class="story-stats">
+          <div>
+            <div class="story-stat-num">12</div>
+            <div class="story-stat-label">Single Origins</div>
+          </div>
+          <div>
+            <div class="story-stat-num">48h</div>
+            <div class="story-stat-label">Roast to Cup</div>
+          </div>
+          <div>
+            <div class="story-stat-num">∞</div>
+            <div class="story-stat-label">Slow Mornings</div>
+          </div>
+        </div>
+      </div>
+      <div class="story-visual">
+        <span class="story-badge">House Pour</span>
+        <canvas id="story-canvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU PREVIEW -->
+  <section class="menu-preview">
+    <div class="section-head">
+      <div class="eyebrow"><span>Tasting menu</span></div>
+      <h2>A short list. <em>Done well.</em></h2>
+      <p>Six house signatures, refreshed each season. Built around what's roasting and what's ripe.</p>
+    </div>
+
+    <div class="menu-cards">
+      <div class="menu-feature-card">
+        <span class="icon">☕</span>
+        <div class="card-meta">House · Hot</div>
+        <h3>Velvet Pour-Over</h3>
+        <p>A slow Ethiopian Yirgacheffe — bright cherry, soft jasmine, finished with a ribbon of brown sugar.</p>
+        <div class="price">$6.50</div>
+      </div>
+      <div class="menu-feature-card">
+        <span class="icon">🥃</span>
+        <div class="card-meta">Signature · Cold</div>
+        <h3>Smoked Cold Brew</h3>
+        <p>72-hour steep, a whisper of oak smoke, served over a single hand-cut sphere of clear ice.</p>
+        <div class="price">$7.00</div>
+      </div>
+      <div class="menu-feature-card">
+        <span class="icon">🍯</span>
+        <div class="card-meta">Indulgence</div>
+        <h3>Honeycomb Latte</h3>
+        <p>Espresso, steamed milk, raw honeycomb folded in just before serving. Quietly extraordinary.</p>
+        <div class="price">$6.75</div>
+      </div>
+      <div class="menu-feature-card">
+        <span class="icon">🥣</span>
+        <div class="card-meta">Kitchen</div>
+        <h3>Forest Grain Bowl</h3>
+        <p>Roasted barley, charred greens, soft-yolk egg, miso-tahini drizzle. Quietly nourishing.</p>
+        <div class="price">$14.00</div>
+      </div>
+      <div class="menu-feature-card">
+        <span class="icon">🍞</span>
+        <div class="card-meta">Bakery · Daily</div>
+        <h3>Cardamom Sourdough</h3>
+        <p>Warm rye sourdough, cultured butter, toasted cardamom, a touch of orange zest.</p>
+        <div class="price">$8.50</div>
+      </div>
+      <div class="menu-feature-card">
+        <span class="icon">🌿</span>
+        <div class="card-meta">Garden · Cold</div>
+        <h3>Yuzu Matcha Tonic</h3>
+        <p>Stone-ground matcha, yuzu, sparkling tonic. Sharp, herbal, and weirdly addictive.</p>
+        <div class="price">$6.25</div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top: 3rem;">
+      <a href="menu.html" class="btn btn-outline">See the full menu →</a>
     </div>
   </section>
 
   <!-- CTA -->
   <section class="cta-section">
-    <div class="cta-grid">
-      <div class="cta-card glass">
-        <div class="cta-icon">📖</div>
-        <h3>Explore Our Menu</h3>
-        <p>Discover our handcrafted coffees, fresh bowls, and vibrant drinks.</p>
-        <a href="menu.html" class="btn btn-primary">View Menu</a>
+    <div class="cta-inner">
+      <div class="eyebrow" style="justify-content:center; margin-bottom: 1.5rem;"><span>Come slow down</span></div>
+      <h2>A table waits, <em>still warm</em>.</h2>
+      <p>Reserve a corner, walk in for a quick pour, or just stop by to read for an hour. We're open early and we stay late.</p>
+      <div class="cta-buttons">
+        <a href="booking.html" class="btn btn-primary">Reserve a Table</a>
+        <a href="menu.html" class="btn btn-outline">Browse Menu</a>
       </div>
-      <div class="cta-card glass">
-        <div class="cta-icon">🪑</div>
-        <h3>Reserve a Table</h3>
-        <p>Secure your spot in our cozy space. Walk-ins welcome too!</p>
-        <a href="booking.html" class="btn btn-primary">Book Now</a>
+
+      <div class="cta-hours">
+        <div class="cta-hours-item">
+          <span class="cta-hours-day">Mon — Fri</span>
+          <span class="cta-hours-time">7am – 9pm</span>
+        </div>
+        <div class="cta-hours-item">
+          <span class="cta-hours-day">Saturday</span>
+          <span class="cta-hours-time">8am – 10pm</span>
+        </div>
+        <div class="cta-hours-item">
+          <span class="cta-hours-day">Sunday</span>
+          <span class="cta-hours-time">8am – 8pm</span>
+        </div>
       </div>
     </div>
   </section>
 
   <footer class="footer" id="footer">
     <div class="footer-grid">
-      <div><h3>Zestora</h3><p>Fresh. Bold. Alive.<br>A modern café experience.</p></div>
-      <div><h3>Hours</h3><ul><li>Mon–Fri: 7am – 9pm</li><li>Sat: 8am – 10pm</li><li>Sun: 8am – 8pm</li></ul></div>
-      <div><h3>Contact</h3><ul><li>123 Green Lane, Downtown</li><li>hello@zestora.cafe</li><li>+1 (555) 234-5678</li></ul></div>
-      <div><h3>Follow Us</h3><ul><li>Instagram</li><li>TikTok</li><li>Twitter / X</li></ul></div>
+      <div>
+        <div class="footer-brand">Zestora</div>
+        <p>Slow brewed. Deeply felt.<br>A cinematic coffee experience.</p>
+      </div>
+      <div>
+        <h3>Visit</h3>
+        <ul>
+          <li>123 Green Lane</li>
+          <li>Downtown</li>
+          <li>+1 (555) 234-5678</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Hours</h3>
+        <ul>
+          <li>Mon–Fri · 7am – 9pm</li>
+          <li>Saturday · 8am – 10pm</li>
+          <li>Sunday · 8am – 8pm</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Follow</h3>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+          <li><a href="#">Twitter / X</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="footer-bottom"><p>&copy; 2026 Zestora. All rights reserved.</p></div>
+    <div class="footer-bottom"><p>© 2026 Zestora — All rights reserved</p></div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>

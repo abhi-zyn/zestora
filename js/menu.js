@@ -53,7 +53,7 @@
     const items = menuData[category];
     items.forEach((item, i) => {
       const card = document.createElement('div');
-      card.className = 'menu-card glass';
+      card.className = 'menu-card';
       card.style.transitionDelay = `${i * 0.08}s`;
       card.innerHTML = `
         <div class="menu-card-emoji">${item.emoji}</div>
