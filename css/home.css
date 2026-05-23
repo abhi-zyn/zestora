@@ -1,0 +1,185 @@
+/* ===== Home Page Styles ===== */
+
+/* Hero */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, var(--base-mint) 0%, var(--base-cream) 70%);
+}
+
+.hero-content {
+  text-align: center;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--text-forest), var(--primary-grass));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-tagline {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  margin-top: 1rem;
+  font-weight: 400;
+  opacity: 0.8;
+  letter-spacing: 0.1em;
+}
+
+.hero-cta {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Floating ingredients in hero */
+.hero-ingredient {
+  position: absolute;
+  opacity: 0;
+  will-change: transform;
+}
+
+/* Assembly Sections */
+.assembly-section {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.assembly-section .section-label {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 600;
+  opacity: 0;
+  text-align: center;
+}
+
+#coffee-canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.assembly-canvas {
+  position: relative;
+  width: min(500px, 80vw);
+  height: min(500px, 80vw);
+}
+
+.assembly-item {
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+/* Coffee section */
+.section-coffee {
+  background: linear-gradient(180deg, var(--base-cream) 0%, var(--base-mint) 100%);
+}
+
+/* Bowl section */
+.section-bowl {
+  background: linear-gradient(180deg, var(--base-mint) 0%, var(--surface-sage) 100%);
+}
+
+/* Drinks section */
+.section-drinks {
+  background: linear-gradient(180deg, var(--surface-sage) 0%, var(--base-cream) 100%);
+}
+
+/* CTA Section */
+.cta-section {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--base-cream);
+}
+
+.cta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  width: 100%;
+}
+
+.cta-card {
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.cta-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(26,46,26,0.15);
+}
+
+.cta-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.cta-card p {
+  opacity: 0.7;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.cta-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Dot navigation */
+.dot-nav {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.dot-nav .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-forest);
+  opacity: 0.2;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.dot-nav .dot.active {
+  opacity: 1;
+  background: var(--primary-lime);
+  transform: scale(1.4);
+}
+
+@media (max-width: 768px) {
+  .dot-nav { right: 1rem; }
+  .dot-nav .dot { width: 8px; height: 8px; }
+  .assembly-canvas { width: 85vw; height: 85vw; }
+}
