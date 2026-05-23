@@ -35,45 +35,91 @@
   </div>
 
   <div class="dot-nav">
-    <div class="dot active" data-target=".canvas-stage--hero"></div>
+    <div class="dot active desktop-only" data-target=".hero"></div>
+    <div class="dot" data-target=".canvas-stage--hero"></div>
     <div class="dot" data-target=".story-section"></div>
     <div class="dot" data-target=".canvas-stage--burger"></div>
     <div class="dot" data-target=".menu-preview"></div>
     <div class="dot" data-target=".cta-section"></div>
   </div>
 
-  <!-- HERO + COFFEE CANVAS — single full-bleed pinned stage -->
-  <section class="canvas-stage canvas-stage--hero section-coffee">
-    <canvas id="coffee-canvas"></canvas>
+  <!-- DESKTOP HERO — separate section before coffee canvas -->
+  <section class="hero desktop-only">
+    <div class="hero-bokeh b1"></div>
+    <div class="hero-bokeh b2"></div>
+    <div class="hero-bokeh b3"></div>
 
-    <div class="canvas-loader" id="coffee-loader">
-      <div class="canvas-loader-bar">
-        <div class="canvas-loader-fill" id="coffee-loader-fill"></div>
-        <div class="canvas-loader-text">Brewing the experience…</div>
-      </div>
-    </div>
-
-    <!-- Overlay pane 1 — hero text, visible at scroll start -->
-    <div class="canvas-overlay-pane" data-pane="hero-intro">
-      <div class="eyebrow"><span>Est. 2026 — Single Origin</span></div>
-      <h1>Slow brewed.<br><span class="accent">Deeply</span> felt.</h1>
-      <p>A cinematic coffee experience. Hand-poured single origins, crafted with patience and served in warm twilight.</p>
-      <div class="pane-cta">
+    <div class="hero-content">
+      <div class="eyebrow hero-eyebrow"><span>Est. 2026 — Single Origin</span></div>
+      <h1 class="hero-title">
+        Slow brewed.<br>
+        <span class="accent">Deeply</span> felt.
+      </h1>
+      <p class="hero-tagline">
+        A cinematic coffee experience. Hand-poured single origins,
+        crafted with patience and served in warm twilight.
+      </p>
+      <div class="hero-cta">
         <a href="menu.html" class="btn btn-primary">Explore the Menu</a>
         <a href="booking.html" class="btn btn-outline">Reserve a Table</a>
       </div>
     </div>
 
-    <!-- Overlay pane 2 — closing cinematic line, fades in near the end -->
-    <div class="canvas-overlay-pane" data-pane="hero-end" style="opacity:0;">
-      <div class="eyebrow"><span>Pour. Bloom. Sip.</span></div>
-      <h2>Coffee, treated as <span class="accent">ritual</span>.</h2>
-      <p>Every cup poured by hand, timed by ear, finished with intention.</p>
-    </div>
-
-    <div class="scroll-cue" data-pane="scroll-cue">
+    <div class="scroll-cue">
       <span>Scroll</span>
       <div class="scroll-cue-line"></div>
+    </div>
+  </section>
+
+  <!-- COFFEE CANVAS STAGE -->
+  <section class="canvas-stage canvas-stage--hero section-coffee">
+    <div class="section-label coffee desktop-only"><span>The brew</span></div>
+
+    <div class="canvas-frame">
+      <canvas id="coffee-canvas"></canvas>
+
+      <div class="canvas-loader" id="coffee-loader">
+        <div class="canvas-loader-bar">
+          <div class="canvas-loader-fill" id="coffee-loader-fill"></div>
+          <div class="canvas-loader-text">Brewing the experience…</div>
+        </div>
+      </div>
+
+      <!-- Desktop overlay: chapter labels + progress -->
+      <div class="canvas-overlay-desktop desktop-only">
+        <div class="overlay-top">
+          <div class="stage-label coffee" id="coffee-stage">
+            <span class="num">Chapter 01</span>
+            The pour
+          </div>
+        </div>
+        <div class="overlay-bottom">
+          <div class="stage-tagline">Watch each cup come alive — pour, bloom, sip.</div>
+          <div class="stage-progress coffee" id="coffee-progress">00 / 192</div>
+        </div>
+      </div>
+
+      <!-- Mobile overlay panes -->
+      <div class="canvas-overlay-pane mobile-only" data-pane="hero-intro">
+        <div class="eyebrow"><span>Est. 2026 — Single Origin</span></div>
+        <h1>Slow brewed.<br><span class="accent">Deeply</span> felt.</h1>
+        <p>A cinematic coffee experience. Hand-poured single origins, crafted with patience and served in warm twilight.</p>
+        <div class="pane-cta">
+          <a href="menu.html" class="btn btn-primary">Explore the Menu</a>
+          <a href="booking.html" class="btn btn-outline">Reserve a Table</a>
+        </div>
+      </div>
+
+      <div class="canvas-overlay-pane mobile-only" data-pane="hero-end" style="opacity:0;">
+        <div class="eyebrow"><span>Pour. Bloom. Sip.</span></div>
+        <h2>Coffee, treated as <span class="accent">ritual</span>.</h2>
+        <p>Every cup poured by hand, timed by ear, finished with intention.</p>
+      </div>
+
+      <div class="scroll-cue mobile-only" data-pane="scroll-cue">
+        <span>Scroll</span>
+        <div class="scroll-cue-line"></div>
+      </div>
     </div>
   </section>
 
@@ -114,27 +160,46 @@
     </div>
   </section>
 
-  <!-- BURGER CANVAS — full-bleed pinned stage -->
+  <!-- BURGER CANVAS STAGE -->
   <section class="canvas-stage canvas-stage--burger section-burger">
-    <canvas id="burger-canvas"></canvas>
+    <div class="section-label burger desktop-only"><span>The build</span></div>
 
-    <div class="canvas-loader" id="burger-loader">
-      <div class="canvas-loader-bar">
-        <div class="canvas-loader-fill" id="burger-loader-fill"></div>
-        <div class="canvas-loader-text">Stacking the layers…</div>
+    <div class="canvas-frame">
+      <canvas id="burger-canvas"></canvas>
+
+      <div class="canvas-loader" id="burger-loader">
+        <div class="canvas-loader-bar">
+          <div class="canvas-loader-fill" id="burger-loader-fill"></div>
+          <div class="canvas-loader-text">Stacking the layers…</div>
+        </div>
       </div>
-    </div>
 
-    <div class="canvas-overlay-pane" data-pane="burger-intro">
-      <div class="eyebrow"><span>From the kitchen</span></div>
-      <h2>Built by hand.<br><span class="accent">Layer</span> by layer.</h2>
-      <p>Brioche, dry-aged beef, slow-melted cheese, garden greens, ripe tomato. Stacked in front of you, served while it's hot.</p>
-    </div>
+      <!-- Desktop overlay: chapter labels -->
+      <div class="canvas-overlay-desktop desktop-only">
+        <div class="overlay-top">
+          <div class="stage-label burger" id="burger-stage">
+            <span class="num">Layer 01</span>
+            The bun
+          </div>
+        </div>
+        <div class="overlay-bottom">
+          <div class="stage-tagline">Hand-stacked, ingredient by ingredient.</div>
+          <div class="stage-progress burger" id="burger-progress">00 / 192</div>
+        </div>
+      </div>
 
-    <div class="canvas-overlay-pane" data-pane="burger-end" style="opacity:0;">
-      <div class="eyebrow"><span>The art of the build</span></div>
-      <h2>Every bite, <span class="accent">honest</span>.</h2>
-      <p>Real ingredients, simply done. No shortcuts, no nonsense.</p>
+      <!-- Mobile overlay panes -->
+      <div class="canvas-overlay-pane mobile-only" data-pane="burger-intro">
+        <div class="eyebrow"><span>From the kitchen</span></div>
+        <h2>Built by hand.<br><span class="accent">Layer</span> by layer.</h2>
+        <p>Brioche, dry-aged beef, slow-melted cheese, garden greens, ripe tomato. Stacked while it's hot.</p>
+      </div>
+
+      <div class="canvas-overlay-pane mobile-only" data-pane="burger-end" style="opacity:0;">
+        <div class="eyebrow"><span>The art of the build</span></div>
+        <h2>Every bite, <span class="accent">honest</span>.</h2>
+        <p>Real ingredients, simply done. No shortcuts, no nonsense.</p>
+      </div>
     </div>
   </section>
 

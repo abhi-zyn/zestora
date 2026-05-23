@@ -1,7 +1,7 @@
-/* ===== Home Page — Cinematic Animations ===== */
+/* ===== Home Page — Responsive Cinematic Animations ===== */
 (function () {
   const SCRUB = 0.8;
-  const isMobile = window.innerWidth < 768;
+  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
 
   // -----------------------------
   // Nav scrolled state
@@ -16,7 +16,43 @@
   });
 
   // -----------------------------
-  // Reusable Scroll-Driven Frame Animation Stage
+  // Desktop hero entrance + idle bokeh + parallax
+  // -----------------------------
+  if (isDesktop) {
+    const heroTl = gsap.timeline({ delay: 0.2 });
+    heroTl
+      .from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out' })
+      .from('.hero-title', { opacity: 0, y: 50, duration: 1.2, ease: 'power4.out' }, '-=0.4')
+      .from('.hero-tagline', { opacity: 0, y: 20, duration: 0.9, ease: 'power3.out' }, '-=0.7')
+      .from('.hero-cta .btn', { opacity: 0, y: 20, stagger: 0.12, duration: 0.6, ease: 'power3.out' }, '-=0.5')
+      .from('.hero .scroll-cue', { opacity: 0, duration: 0.8 }, '-=0.3');
+
+    gsap.utils.toArray('.hero-bokeh').forEach((el, i) => {
+      gsap.to(el, {
+        x: (Math.random() - 0.5) * 60,
+        y: (Math.random() - 0.5) * 60,
+        duration: 8 + Math.random() * 4,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: i * 0.5
+      });
+    });
+
+    gsap.to('.hero-content', {
+      y: -80,
+      opacity: 0,
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1
+      }
+    });
+  }
+
+  // -----------------------------
+  // Reusable Canvas Stage
   // -----------------------------
   function createCanvasStage(config) {
     const {
@@ -28,10 +64,14 @@
       sectionSelector,
       loaderId,
       loaderFillId,
-      panes,           // [{ selector, in: [start,end], out:[start,end], yIn, yOut }]
-      scrubLength = '+=350%',
-      tintRgba,        // optional per-frame green tint overlay (for burger)
-      vignetteRgba = 'rgba(7, 9, 10, 0.45)'
+      progressId,         // desktop progress text
+      stageId,            // desktop chapter label container
+      stageLabelText = 'Chapter',
+      stages,             // [{ at, num, label }] desktop chapter milestones
+      panes,              // [{ selector, in, out, yIn, yOut }] mobile overlay panes
+      scrubLength = '+=300%',
+      tintRgba,
+      vignetteRgba = 'rgba(7, 18, 9, 0.5)'
     } = config;
 
     const canvas = document.getElementById(canvasId);
@@ -43,6 +83,8 @@
 
     const loaderEl = loaderId ? document.getElementById(loaderId) : null;
     const loaderFill = loaderFillId ? document.getElementById(loaderFillId) : null;
+    const progressEl = progressId ? document.getElementById(progressId) : null;
+    const stageEl = stageId ? document.getElementById(stageId) : null;
 
     function setSize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -81,7 +123,6 @@
 
     function drawFrame(img, w, h) {
       ctx.clearRect(0, 0, w, h);
-      // Crop bottom 7% to remove "Veo" watermark
       const cropBottom = Math.floor(img.naturalHeight * 0.07);
       const sw = img.naturalWidth;
       const sh = img.naturalHeight - cropBottom;
@@ -92,7 +133,7 @@
       const dy = (h - drawH) / 2;
       ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
 
-      // Optional color tint to unify against the dark green theme
+      // Optional tint to unify (used for burger to match dark green)
       if (tintRgba) {
         ctx.save();
         ctx.globalCompositeOperation = 'multiply';
@@ -101,7 +142,6 @@
         ctx.restore();
       }
 
-      // Soft vignette
       const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.55, w / 2, h / 2, Math.max(w, h) * 0.75);
       grad.addColorStop(0, 'rgba(13, 31, 15, 0)');
       grad.addColorStop(1, vignetteRgba);
@@ -126,9 +166,35 @@
         return;
       }
       drawFrame(img, w, h);
+
+      if (progressEl) {
+        progressEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + frameCount;
+      }
     }
 
-    // Resolve pane DOM elements once
+    // Desktop chapter label updates
+    let currentStage = -1;
+    function updateStageLabel(progress) {
+      if (!stageEl || !stages) return;
+      let next = 0;
+      for (let i = stages.length - 1; i >= 0; i--) {
+        if (progress >= stages[i].at) { next = i; break; }
+      }
+      if (next !== currentStage) {
+        currentStage = next;
+        const s = stages[next];
+        gsap.to(stageEl, {
+          opacity: 0, y: 10, duration: 0.3, ease: 'power2.in',
+          onComplete: () => {
+            stageEl.innerHTML = `<span class="num">${stageLabelText} ${s.num}</span>${s.label}`;
+            gsap.to(stageEl, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+          }
+        });
+      }
+    }
+    if (stageEl) gsap.set(stageEl, { opacity: 1, y: 0 });
+
+    // Mobile overlay pane updates
     const paneEls = (panes || []).map(p => ({
       ...p,
       el: document.querySelector(p.selector)
@@ -142,7 +208,6 @@
         let opacity = 0;
         let y = 0;
         if (p.in && progress >= p.in[0] && progress <= p.in[1]) {
-          // Fade-in within this range
           const t = smoothstep((progress - p.in[0]) / (p.in[1] - p.in[0]));
           opacity = t;
           y = (1 - t) * (p.yIn ?? 40);
@@ -156,7 +221,6 @@
         } else if (p.out && progress > p.out[1]) {
           opacity = 0; y = -(p.yOut ?? 60);
         }
-        // If only `out` defined, start visible
         if (!p.in && p.out && progress < p.out[0]) { opacity = 1; y = 0; }
 
         p.el.style.opacity = opacity.toFixed(3);
@@ -164,10 +228,8 @@
       });
     }
 
-    // Initial pane state — first pane visible, rest hidden
-    paneEls.forEach((p, i) => {
-      if (i === 0 && !p.in) { p.el.style.opacity = '1'; p.el.style.transform = 'translateY(0)'; }
-      else if (!p.in) { p.el.style.opacity = '1'; p.el.style.transform = 'translateY(0)'; }
+    paneEls.forEach((p) => {
+      if (!p.in) { p.el.style.opacity = '1'; p.el.style.transform = 'translateY(0)'; }
       else { p.el.style.opacity = '0'; }
     });
 
@@ -181,7 +243,10 @@
         start: 'top top',
         end: scrubLength,
         scrub: SCRUB,
-        onUpdate: (self) => updatePanes(self.progress)
+        onUpdate: (self) => {
+          updateStageLabel(self.progress);
+          updatePanes(self.progress);
+        }
       },
       onUpdate: render
     });
@@ -190,10 +255,7 @@
   }
 
   // -----------------------------
-  // Coffee stage (hero merges in here)
-  //   Pane 1 (hero intro):  visible 0–0.10, fades out 0.10–0.40
-  //   Pane 2 (hero end):    fades in 0.70–0.92
-  //   Scroll cue:           visible at start, fades out 0.05–0.15
+  // Coffee canvas
   // -----------------------------
   const coffeeAnim = createCanvasStage({
     canvasId: 'coffee-canvas',
@@ -202,20 +264,26 @@
     sectionSelector: '.canvas-stage--hero',
     loaderId: 'coffee-loader',
     loaderFillId: 'coffee-loader-fill',
-    scrubLength: '+=350%',
+    progressId: 'coffee-progress',
+    stageId: 'coffee-stage',
+    stageLabelText: 'Chapter',
+    stages: [
+      { at: 0.0,  num: '01', label: 'The pour' },
+      { at: 0.30, num: '02', label: 'The bloom' },
+      { at: 0.60, num: '03', label: 'The crema' },
+      { at: 0.85, num: '04', label: 'The first sip' }
+    ],
     panes: [
       { selector: '[data-pane="hero-intro"]', out: [0.10, 0.40], yOut: 50 },
       { selector: '[data-pane="hero-end"]',   in:  [0.70, 0.92], yIn: 40 },
       { selector: '[data-pane="scroll-cue"]', out: [0.04, 0.14], yOut: 20 }
     ],
+    scrubLength: isDesktop ? '+=250%' : '+=350%',
     vignetteRgba: 'rgba(7, 18, 9, 0.5)'
   });
 
   // -----------------------------
-  // Burger stage — same structure
-  //   Pane 1 (burger intro): visible 0–0.10, fades out 0.10–0.40
-  //   Pane 2 (burger end):   fades in 0.72–0.92
-  //   Tint: dark green multiply to match coffee mood
+  // Burger canvas
   // -----------------------------
   createCanvasStage({
     canvasId: 'burger-canvas',
@@ -224,17 +292,30 @@
     sectionSelector: '.canvas-stage--burger',
     loaderId: 'burger-loader',
     loaderFillId: 'burger-loader-fill',
-    scrubLength: '+=350%',
+    progressId: 'burger-progress',
+    stageId: 'burger-stage',
+    stageLabelText: 'Layer',
+    stages: [
+      { at: 0.0,  num: '01', label: 'The bun' },
+      { at: 0.25, num: '02', label: 'The patty' },
+      { at: 0.50, num: '03', label: 'The cheese' },
+      { at: 0.75, num: '04', label: 'The greens' },
+      { at: 0.92, num: '05', label: 'The build' }
+    ],
     panes: [
       { selector: '[data-pane="burger-intro"]', out: [0.10, 0.40], yOut: 50 },
       { selector: '[data-pane="burger-end"]',   in:  [0.72, 0.92], yIn: 40 }
     ],
-    tintRgba: 'rgba(20, 50, 26, 0.55)',
-    vignetteRgba: 'rgba(7, 18, 9, 0.55)'
+    scrubLength: isDesktop ? '+=250%' : '+=350%',
+    // Burger frames have a light gray studio bg.
+    // On mobile (full-bleed), tint heavily to match the dark green env.
+    // On desktop (contained frame), keep original mood — light bg looks great as a studio shot.
+    tintRgba: isDesktop ? null : 'rgba(20, 50, 26, 0.55)',
+    vignetteRgba: isDesktop ? 'rgba(0, 0, 0, 0.35)' : 'rgba(7, 18, 9, 0.55)'
   });
 
   // -----------------------------
-  // Story-section mini canvas (uses coffee frames)
+  // Story-section mini canvas
   // -----------------------------
   const storyCanvas = document.getElementById('story-canvas');
   if (storyCanvas && coffeeAnim) {
@@ -296,41 +377,33 @@
   }
 
   // -----------------------------
-  // Section transitions — outgoing scale+fade, incoming translate+fade
-  // Applied to non-pinned sections (story, menu, cta)
+  // Section transitions (mobile only — desktop uses entrance reveals below)
   // -----------------------------
-  const transitionSections = gsap.utils.toArray('.section-transition');
-  transitionSections.forEach((sec) => {
-    // Incoming: translateY 60 → 0, opacity 0 → 1
-    gsap.fromTo(sec,
-      { y: 60, opacity: 0 },
-      {
-        y: 0, opacity: 1, ease: 'none',
-        scrollTrigger: {
-          trigger: sec,
-          start: 'top bottom',
-          end: 'top 60%',
-          scrub: 1
+  if (!isDesktop) {
+    gsap.utils.toArray('.section-transition').forEach((sec) => {
+      gsap.fromTo(sec,
+        { y: 60, opacity: 0 },
+        {
+          y: 0, opacity: 1, ease: 'none',
+          scrollTrigger: {
+            trigger: sec, start: 'top bottom', end: 'top 60%', scrub: 1
+          }
         }
-      }
-    );
-    // Outgoing: scale 1 → 0.95, opacity 1 → 0
-    gsap.fromTo(sec,
-      { scale: 1, opacity: 1 },
-      {
-        scale: 0.95, opacity: 0, ease: 'none',
-        scrollTrigger: {
-          trigger: sec,
-          start: 'bottom 80%',
-          end: 'bottom top',
-          scrub: 1
+      );
+      gsap.fromTo(sec,
+        { scale: 1, opacity: 1 },
+        {
+          scale: 0.95, opacity: 0, ease: 'none',
+          scrollTrigger: {
+            trigger: sec, start: 'bottom 80%', end: 'bottom top', scrub: 1
+          }
         }
-      }
-    );
-  });
+      );
+    });
+  }
 
   // -----------------------------
-  // Story text + visual reveal (subtle)
+  // Story / Menu / CTA reveals (desktop & mobile)
   // -----------------------------
   gsap.from('.story-text > *', {
     opacity: 0,
@@ -348,9 +421,6 @@
     scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
   });
 
-  // -----------------------------
-  // Menu cards reveal
-  // -----------------------------
   gsap.from('.section-head > *', {
     opacity: 0,
     y: 30,
@@ -368,9 +438,6 @@
     scrollTrigger: { trigger: '.menu-cards', start: 'top 80%' }
   });
 
-  // -----------------------------
-  // CTA reveal
-  // -----------------------------
   gsap.from('.cta-section .cta-inner > *', {
     opacity: 0,
     y: 30,
@@ -383,9 +450,17 @@
   // -----------------------------
   // Dot navigation
   // -----------------------------
-  const sections = ['.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section'];
-  const dots = document.querySelectorAll('.dot-nav .dot');
-  sections.forEach((sel, i) => {
+  const sectionList = isDesktop
+    ? ['.hero', '.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section']
+    : ['.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section'];
+
+  // Visible dots only — first dot (.desktop-only) hidden on mobile via CSS, so getBoundingClientRect would still work but we want to map by index.
+  const allDots = document.querySelectorAll('.dot-nav .dot');
+  const visibleDots = isDesktop
+    ? Array.from(allDots)
+    : Array.from(allDots).filter(d => !d.classList.contains('desktop-only'));
+
+  sectionList.forEach((sel, i) => {
     ScrollTrigger.create({
       trigger: sel,
       start: 'top center',
@@ -395,9 +470,9 @@
     });
   });
   function setActiveDot(index) {
-    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    visibleDots.forEach((d, i) => d.classList.toggle('active', i === index));
   }
-  dots.forEach((dot) => {
+  allDots.forEach((dot) => {
     dot.addEventListener('click', () => {
       const target = document.querySelector(dot.dataset.target);
       if (target && window.lenis) window.lenis.scrollTo(target);
