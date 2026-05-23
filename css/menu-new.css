@@ -120,7 +120,8 @@ body {
 .menu-card-img {
   width: 100px; height: 100px; margin: 0 auto 0.6rem;
   border-radius: 50%; object-fit: cover;
-  animation: spin 8s linear infinite;
+  animation: plate-turn 6s ease-in-out infinite;
+  transform-origin: center center;
 }
 .menu-card h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
 .menu-card .category { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 0.5rem; }
@@ -133,10 +134,18 @@ body {
   cursor: pointer;
 }
 
-/* Rotation animation */
+/* Plate-on-table rotation: partial back-and-forth turn (top-down view) */
+@keyframes plate-turn {
+  0%   { transform: rotate(-18deg); }
+  50%  { transform: rotate(18deg); }
+  100% { transform: rotate(-18deg); }
+}
+
+/* Kept for backward compatibility, but now a partial sway */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0%   { transform: rotate(-22deg); }
+  50%  { transform: rotate(22deg); }
+  100% { transform: rotate(-22deg); }
 }
 
 /* Bottom Nav */
@@ -180,7 +189,10 @@ body {
   width: 200px; height: 200px; border-radius: 50%; object-fit: cover;
   box-shadow: 0 8px 30px rgba(46,125,50,0.2);
 }
-.detail-image.rotating { animation: spin 6s linear infinite; }
+.detail-image.rotating {
+  animation: plate-turn 7s ease-in-out infinite;
+  transform-origin: center center;
+}
 .detail-info { text-align: center; }
 .detail-info h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
 .detail-info p { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem; }
