@@ -1,7 +1,9 @@
 /* ===== Home Page — Responsive Cinematic Animations ===== */
 (function () {
-  const SCRUB = 0.8;
-  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
+  const isDesktop = window.matchMedia('(min-width: 769px)').matches;
+  const isMobile = !isDesktop;
+  const SCRUB = isDesktop ? 0.8 : 1.2;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // -----------------------------
   // Nav scrolled state
@@ -101,7 +103,13 @@
       ctx.imageSmoothingQuality = 'high';
     }
     setSize();
-    window.addEventListener('resize', () => { setSize(); render(); });
+
+    // Debounced resize (200ms) for mobile
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { setSize(); render(); }, 200);
+    });
 
     function imgLoaded() {
       loaded++;
@@ -111,15 +119,27 @@
       if (loaded >= Math.min(40, frameCount)) {
         loaderEl && loaderEl.classList.add('hidden');
       }
+      maybeLoadSecondBatch();
     }
 
-    for (let i = 1; i <= frameCount; i++) {
-      const img = new Image();
-      img.onload = imgLoaded;
-      img.onerror = imgLoaded;
-      img.src = `${framesDir}/${framePrefix}${String(i).padStart(3, '0')}.${frameExt}`;
-      frames.push(img);
+    // Lazy load: mobile loads first 20 frames, then rest after first batch finishes
+    const initialBatch = isMobile ? Math.min(20, frameCount) : frameCount;
+    let secondBatchStarted = false;
+    function maybeLoadSecondBatch() {
+      if (secondBatchStarted || loaded < initialBatch || initialBatch >= frameCount) return;
+      secondBatchStarted = true;
+      loadFrames(initialBatch + 1, frameCount);
     }
+    function loadFrames(start, end) {
+      for (let i = start; i <= end; i++) {
+        const img = new Image();
+        img.onload = imgLoaded;
+        img.onerror = imgLoaded;
+        img.src = `${framesDir}/${framePrefix}${String(i).padStart(3, '0')}.${frameExt}`;
+        frames[i - 1] = img;
+      }
+    }
+    loadFrames(1, initialBatch);
 
     function drawFrame(img, w, h) {
       ctx.clearRect(0, 0, w, h);
@@ -287,7 +307,7 @@
       // scroll cue fades out early
       { selector: '[data-pane="scroll-cue"]',   out: [0.04, 0.14], yOut: 20 }
     ],
-    scrubLength: isDesktop ? '+=250%' : '+=400%',
+    scrubLength: isDesktop ? '+=250%' : '+=150%',
     vignetteRgba: 'rgba(7, 18, 9, 0.5)'
   });
 
@@ -319,7 +339,7 @@
       { selector: '[data-pane="burger-greens"]', in: [0.71, 0.77], out: [0.82, 0.88], yIn: 30, yOut: 30 },
       { selector: '[data-pane="burger-build"]',  in: [0.89, 0.94], yIn: 30 }
     ],
-    scrubLength: isDesktop ? '+=250%' : '+=400%',
+    scrubLength: isDesktop ? '+=250%' : '+=120%',
     // Burger frames have a light gray studio bg.
     // Mobile contained frame: keep tint subtle so colors remain vibrant in the small player.
     // Desktop: keep original — looks like an intentional studio shot inside the framed widescreen.
@@ -390,9 +410,34 @@
   }
 
   // -----------------------------
-  // Section transitions (mobile only — desktop uses entrance reveals below)
+  // Section transitions
+  //   Desktop: GSAP scroll-based reveals (handled below)
+  //   Mobile:  IntersectionObserver — translateY(40)→0 + fade, 0.6s ease-out, stagger 0.1s
   // -----------------------------
-  if (!isDesktop) {
+  if (isMobile && !prefersReducedMotion) {
+    const revealTargets = [
+      ...document.querySelectorAll('.story-text > *'),
+      ...document.querySelectorAll('.story-visual'),
+      ...document.querySelectorAll('.story-stats > div'),
+      ...document.querySelectorAll('.section-head > *'),
+      ...document.querySelectorAll('.menu-feature-card'),
+      ...document.querySelectorAll('.cta-section .cta-inner > *')
+    ];
+    revealTargets.forEach(el => el.classList.add('reveal-on-scroll'));
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    revealTargets.forEach(el => io.observe(el));
+  }
+
+  if (!isMobile) {
     gsap.utils.toArray('.section-transition').forEach((sec) => {
       gsap.fromTo(sec,
         { y: 60, opacity: 0 },
@@ -416,49 +461,30 @@
   }
 
   // -----------------------------
-  // Story / Menu / CTA reveals (desktop & mobile)
+  // Story / Menu / CTA reveals (desktop only — mobile uses IntersectionObserver above)
   // -----------------------------
-  gsap.from('.story-text > *', {
-    opacity: 0,
-    y: 30,
-    stagger: 0.1,
-    duration: 0.9,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
-  });
-  gsap.from('.story-visual', {
-    opacity: 0,
-    scale: 0.95,
-    duration: 1.2,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
-  });
-
-  gsap.from('.section-head > *', {
-    opacity: 0,
-    y: 30,
-    stagger: 0.1,
-    duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '.menu-preview', start: 'top 75%' }
-  });
-  gsap.from('.menu-feature-card', {
-    opacity: 0,
-    y: 40,
-    stagger: 0.08,
-    duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '.menu-cards', start: 'top 80%' }
-  });
-
-  gsap.from('.cta-section .cta-inner > *', {
-    opacity: 0,
-    y: 30,
-    stagger: 0.1,
-    duration: 0.9,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '.cta-section', start: 'top 75%' }
-  });
+  if (isDesktop) {
+    gsap.from('.story-text > *', {
+      opacity: 0, y: 30, stagger: 0.1, duration: 0.9, ease: 'power3.out',
+      scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
+    });
+    gsap.from('.story-visual', {
+      opacity: 0, scale: 0.95, duration: 1.2, ease: 'power3.out',
+      scrollTrigger: { trigger: '.story-section', start: 'top 70%' }
+    });
+    gsap.from('.section-head > *', {
+      opacity: 0, y: 30, stagger: 0.1, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: '.menu-preview', start: 'top 75%' }
+    });
+    gsap.from('.menu-feature-card', {
+      opacity: 0, y: 40, stagger: 0.08, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: '.menu-cards', start: 'top 80%' }
+    });
+    gsap.from('.cta-section .cta-inner > *', {
+      opacity: 0, y: 30, stagger: 0.1, duration: 0.9, ease: 'power3.out',
+      scrollTrigger: { trigger: '.cta-section', start: 'top 75%' }
+    });
+  }
 
   // -----------------------------
   // Dot navigation
@@ -467,7 +493,6 @@
     ? ['.hero', '.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section']
     : ['.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section'];
 
-  // Visible dots only — first dot (.desktop-only) hidden on mobile via CSS, so getBoundingClientRect would still work but we want to map by index.
   const allDots = document.querySelectorAll('.dot-nav .dot');
   const visibleDots = isDesktop
     ? Array.from(allDots)
