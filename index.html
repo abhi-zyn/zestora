@@ -71,27 +71,31 @@
 
   <!-- COFFEE FRAME ANIMATION -->
   <section class="section-coffee">
-    <canvas id="coffee-canvas"></canvas>
+    <div class="coffee-section-label"><span>The brew</span></div>
 
-    <div class="coffee-loader" id="coffee-loader">
-      <div class="coffee-loader-bar">
-        <div class="coffee-loader-fill" id="coffee-loader-fill"></div>
-        <div class="coffee-loader-text">Brewing the experience…</div>
-      </div>
-    </div>
+    <div class="coffee-stage-frame">
+      <canvas id="coffee-canvas"></canvas>
 
-    <div class="coffee-overlay">
-      <div class="coffee-overlay-top">
-        <div class="coffee-stage" id="coffee-stage">
-          <span class="num">Chapter 01</span>
-          The pour
+      <div class="coffee-loader" id="coffee-loader">
+        <div class="coffee-loader-bar">
+          <div class="coffee-loader-fill" id="coffee-loader-fill"></div>
+          <div class="coffee-loader-text">Brewing the experience…</div>
         </div>
       </div>
-      <div class="coffee-overlay-bottom">
-        <div class="coffee-tagline">
-          Watch each cup come alive — pour, bloom, sip.
+
+      <div class="coffee-overlay">
+        <div class="coffee-overlay-top">
+          <div class="coffee-stage" id="coffee-stage">
+            <span class="num">Chapter 01</span>
+            The pour
+          </div>
         </div>
-        <div class="coffee-progress" id="coffee-progress">00 / 240</div>
+        <div class="coffee-overlay-bottom">
+          <div class="coffee-tagline">
+            Watch each cup come alive — pour, bloom, sip.
+          </div>
+          <div class="coffee-progress" id="coffee-progress">00 / 240</div>
+        </div>
       </div>
     </div>
   </section>

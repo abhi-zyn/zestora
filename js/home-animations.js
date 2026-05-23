@@ -75,10 +75,20 @@
 
   function setCanvasSize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = canvas.offsetWidth * dpr;
-    canvas.height = canvas.offsetHeight * dpr;
+    // Cap internal resolution at native frame size (1280x720) to avoid pointless upscale
+    const NATIVE_W = 1280, NATIVE_H = 720;
+    const cssW = canvas.offsetWidth;
+    const cssH = canvas.offsetHeight;
+    const targetW = Math.min(cssW * dpr, NATIVE_W);
+    const targetH = Math.min(cssH * dpr, NATIVE_H);
+    canvas.width = targetW;
+    canvas.height = targetH;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
+    // Scale drawing ops to css pixel space
+    ctx.scale(targetW / cssW, targetH / cssH);
+    // Higher quality interpolation
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
   }
   setCanvasSize();
   window.addEventListener('resize', () => {
@@ -139,33 +149,27 @@
   function drawFrame(img, w, h) {
     ctx.clearRect(0, 0, w, h);
 
-    // Crop bottom strip (~7%) to remove "Veo" watermark
+    // Crop bottom strip (~7%) from source to remove "Veo" watermark
     const cropBottom = Math.floor(img.naturalHeight * 0.07);
     const sw = img.naturalWidth;
     const sh = img.naturalHeight - cropBottom;
 
-    // Cover-fit
-    const scale = Math.max(w / sw, h / sh);
-    const drawW = sw * scale;
-    const drawH = sh * scale;
+    // Frame is 16:9, source is 16:9 — scale source to fully fill (no upscale beyond native)
+    const scale = Math.min(w / sw, h / sh);
+    // Use cover semantics so the frame is fully filled (slight overflow is fine since aspects match)
+    const fillScale = Math.max(w / sw, h / sh);
+    const drawW = sw * fillScale;
+    const drawH = sh * fillScale;
     const dx = (w - drawW) / 2;
     const dy = (h - drawH) / 2;
 
     ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
 
-    // Cinematic vignette (also helps any residual watermark blend in)
-    const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+    // Soft edge vignette — adds depth without hiding the image
+    const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.55, w / 2, h / 2, Math.max(w, h) * 0.75);
     grad.addColorStop(0, 'rgba(7, 9, 10, 0)');
-    grad.addColorStop(0.7, 'rgba(7, 9, 10, 0.35)');
-    grad.addColorStop(1, 'rgba(7, 9, 10, 0.85)');
+    grad.addColorStop(1, 'rgba(7, 9, 10, 0.45)');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-
-    // Bottom gradient for text legibility + extra watermark hide
-    const bottomGrad = ctx.createLinearGradient(0, h * 0.55, 0, h);
-    bottomGrad.addColorStop(0, 'rgba(7, 9, 10, 0)');
-    bottomGrad.addColorStop(1, 'rgba(7, 9, 10, 0.7)');
-    ctx.fillStyle = bottomGrad;
     ctx.fillRect(0, 0, w, h);
   }
 
