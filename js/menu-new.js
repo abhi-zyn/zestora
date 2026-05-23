@@ -65,7 +65,9 @@
     gridEl.innerHTML = filtered.map((d, i) => `
       <div class="menu-card" data-index="${i}">
         <button class="heart">♡</button>
-        <img class="menu-card-img" src="${getImagePath(d.name)}" alt="${d.name}">
+        <div class="menu-card-plate">
+          <img class="menu-card-img" src="${getImagePath(d.name)}" alt="${d.name}">
+        </div>
         <h3>${d.name}</h3>
         <p class="category">${d.category}</p>
         <div class="menu-card-footer">

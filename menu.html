@@ -13,15 +13,23 @@
   <div class="app">
     <!-- Header -->
     <header class="header">
-      <div class="header-left">
-        <div class="avatar">Z</div>
-        <div>
-          <p class="greeting">Choose</p>
-          <h1>Your Favorite <span class="highlight">Food</span></h1>
-        </div>
+      <button class="header-icon-btn menu-btn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="header-brand">
+        <p class="greeting">Welcome to</p>
+        <h1>Zest<span class="highlight">ora</span></h1>
       </div>
-      <button class="notif-btn">🔔</button>
+      <button class="header-icon-btn notif-btn" aria-label="Notifications">
+        <span class="notif-dot"></span>🔔
+      </button>
     </header>
+
+    <!-- Hero / Title -->
+    <div class="hero-title">
+      <h2>Choose Your <span class="highlight">Favorite Food</span></h2>
+      <p>Fresh • Healthy • Delicious</p>
+    </div>
 
     <!-- Search -->
     <div class="search-bar">
@@ -41,14 +49,6 @@
       </div>
       <div class="menu-grid" id="menuGrid"></div>
     </section>
-
-    <!-- Bottom Nav -->
-    <nav class="bottom-nav">
-      <button class="nav-item active">🏠</button>
-      <button class="nav-item">❤️</button>
-      <button class="nav-item">🛒</button>
-      <button class="nav-item">👤</button>
-    </nav>
   </div>
 
   <!-- Detail Modal -->
@@ -59,7 +59,9 @@
         <button class="detail-more">⋮</button>
       </div>
       <div class="detail-image-wrap">
-        <img class="detail-image rotating" id="detailImage" src="" alt="">
+        <div class="detail-plate">
+          <img class="detail-image" id="detailImage" src="" alt="">
+        </div>
       </div>
       <div class="detail-info">
         <h2 id="detailName"></h2>
