@@ -1,3 +1,30 @@
+/* ===== Page Loader — wait for all images ===== */
+(function () {
+  const loader = document.getElementById('page-loader');
+  const fill = document.getElementById('page-loader-fill');
+  if (!loader) return;
+
+  let dismissed = false;
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    if (fill) fill.style.width = '100%';
+    setTimeout(() => loader.classList.add('hidden'), 300);
+  }
+
+  // Track progress from canvas frame loaders via custom event
+  window.__pageLoaderProgress = function (pct) {
+    if (fill && !dismissed) fill.style.width = Math.round(pct) + '%';
+    if (pct >= 100) dismiss();
+  };
+
+  // Also dismiss on window load (all static resources)
+  window.addEventListener('load', dismiss);
+
+  // Fallback: dismiss after 8s regardless
+  setTimeout(dismiss, 8000);
+})();
+
 /* ===== Home Page — Responsive Cinematic Animations ===== */
 (function () {
   const isDesktop = window.matchMedia('(min-width: 769px)').matches;
@@ -118,6 +145,10 @@
       if (loaded === 1 || loaded === Math.floor(frameCount / 4)) render();
       if (loaded >= Math.min(40, frameCount)) {
         loaderEl && loaderEl.classList.add('hidden');
+      }
+      // Report to page loader (first canvas drives it)
+      if (window.__pageLoaderProgress && canvasId === 'coffee-canvas') {
+        window.__pageLoaderProgress(pct);
       }
       maybeLoadSecondBatch();
     }
