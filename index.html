@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <!-- Desktop overlay: chapter labels + progress -->
+      <!-- Desktop overlay: chapter labels + progress (inside frame, on top of canvas) -->
       <div class="canvas-overlay-desktop desktop-only">
         <div class="overlay-top">
           <div class="stage-label coffee" id="coffee-stage">
@@ -98,28 +98,48 @@
           <div class="stage-progress coffee" id="coffee-progress">00 / 192</div>
         </div>
       </div>
+    </div>
 
-      <!-- Mobile overlay panes -->
-      <div class="canvas-overlay-pane mobile-only" data-pane="hero-intro">
+    <!-- Mobile text region: panes fade in/out as scroll progresses -->
+    <div class="canvas-text-region mobile-only">
+      <div class="canvas-overlay-pane" data-pane="coffee-intro">
         <div class="eyebrow"><span>Est. 2026 — Single Origin</span></div>
         <h1>Slow brewed.<br><span class="accent">Deeply</span> felt.</h1>
-        <p>A cinematic coffee experience. Hand-poured single origins, crafted with patience and served in warm twilight.</p>
+        <p>Hand-poured single origins, served in warm twilight.</p>
         <div class="pane-cta">
-          <a href="menu.html" class="btn btn-primary">Explore the Menu</a>
-          <a href="booking.html" class="btn btn-outline">Reserve a Table</a>
+          <a href="menu.html" class="btn btn-primary">Explore Menu</a>
+          <a href="booking.html" class="btn btn-outline">Reserve</a>
         </div>
       </div>
 
-      <div class="canvas-overlay-pane mobile-only" data-pane="hero-end" style="opacity:0;">
-        <div class="eyebrow"><span>Pour. Bloom. Sip.</span></div>
-        <h2>Coffee, treated as <span class="accent">ritual</span>.</h2>
-        <p>Every cup poured by hand, timed by ear, finished with intention.</p>
+      <div class="canvas-overlay-pane" data-pane="coffee-pour" style="opacity:0;">
+        <div class="eyebrow"><span>Chapter 01</span></div>
+        <h2>The <span class="accent">pour</span>.</h2>
+        <p>A slow stream — hot water meets fresh grounds.</p>
       </div>
 
-      <div class="scroll-cue mobile-only" data-pane="scroll-cue">
-        <span>Scroll</span>
-        <div class="scroll-cue-line"></div>
+      <div class="canvas-overlay-pane" data-pane="coffee-bloom" style="opacity:0;">
+        <div class="eyebrow"><span>Chapter 02</span></div>
+        <h2>The <span class="accent">bloom</span>.</h2>
+        <p>A pause. A breath. Aromas lift from the cup.</p>
       </div>
+
+      <div class="canvas-overlay-pane" data-pane="coffee-crema" style="opacity:0;">
+        <div class="eyebrow"><span>Chapter 03</span></div>
+        <h2>The <span class="accent">crema</span>.</h2>
+        <p>Layers settle. Color deepens. Body builds.</p>
+      </div>
+
+      <div class="canvas-overlay-pane" data-pane="coffee-sip" style="opacity:0;">
+        <div class="eyebrow"><span>Chapter 04</span></div>
+        <h2>The first <span class="accent">sip</span>.</h2>
+        <p>Slow start. Deep finish. Worth the wait.</p>
+      </div>
+    </div>
+
+    <div class="scroll-cue mobile-only" data-pane="scroll-cue">
+      <span>Scroll</span>
+      <div class="scroll-cue-line"></div>
     </div>
   </section>
 
@@ -187,18 +207,44 @@
           <div class="stage-progress burger" id="burger-progress">00 / 192</div>
         </div>
       </div>
+    </div>
 
-      <!-- Mobile overlay panes -->
-      <div class="canvas-overlay-pane mobile-only" data-pane="burger-intro">
+    <!-- Mobile text region: per-layer texts -->
+    <div class="canvas-text-region mobile-only">
+      <div class="canvas-overlay-pane" data-pane="burger-intro">
         <div class="eyebrow"><span>From the kitchen</span></div>
         <h2>Built by hand.<br><span class="accent">Layer</span> by layer.</h2>
-        <p>Brioche, dry-aged beef, slow-melted cheese, garden greens, ripe tomato. Stacked while it's hot.</p>
+        <p>Brioche. Beef. Cheese. Greens. Stacked while it's hot.</p>
       </div>
 
-      <div class="canvas-overlay-pane mobile-only" data-pane="burger-end" style="opacity:0;">
-        <div class="eyebrow"><span>The art of the build</span></div>
-        <h2>Every bite, <span class="accent">honest</span>.</h2>
-        <p>Real ingredients, simply done. No shortcuts, no nonsense.</p>
+      <div class="canvas-overlay-pane" data-pane="burger-bun" style="opacity:0;">
+        <div class="eyebrow"><span>Layer 01</span></div>
+        <h2>The <span class="accent">bun</span>.</h2>
+        <p>Brioche, golden, lightly toasted on the flat-top.</p>
+      </div>
+
+      <div class="canvas-overlay-pane" data-pane="burger-patty" style="opacity:0;">
+        <div class="eyebrow"><span>Layer 02</span></div>
+        <h2>The <span class="accent">patty</span>.</h2>
+        <p>Dry-aged beef, charred edges, soft pink center.</p>
+      </div>
+
+      <div class="canvas-overlay-pane" data-pane="burger-cheese" style="opacity:0;">
+        <div class="eyebrow"><span>Layer 03</span></div>
+        <h2>The <span class="accent">cheese</span>.</h2>
+        <p>American cheddar, slow-melted into every crevice.</p>
+      </div>
+
+      <div class="canvas-overlay-pane" data-pane="burger-greens" style="opacity:0;">
+        <div class="eyebrow"><span>Layer 04</span></div>
+        <h2>The <span class="accent">greens</span>.</h2>
+        <p>Crisp lettuce. Ripe tomato. A whisper of crunch.</p>
+      </div>
+
+      <div class="canvas-overlay-pane" data-pane="burger-build" style="opacity:0;">
+        <div class="eyebrow"><span>Layer 05</span></div>
+        <h2>The <span class="accent">build</span>.</h2>
+        <p>Stacked. Hot. Honest. Ready in minutes.</p>
       </div>
     </div>
   </section>

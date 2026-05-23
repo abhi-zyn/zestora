@@ -140,29 +140,38 @@
 
 /* ===========================================================
    CANVAS STAGE — adapts to layout
-   Mobile (<900): full-bleed with mask fade
+   Mobile (<900): contained 16:9 frame + dedicated text region below
    Desktop (≥900): contained widescreen frame in centered section
    =========================================================== */
 
-/* Base: mobile full-bleed */
+/* Base: mobile contained */
 .canvas-stage {
   position: relative;
   height: 100vh;
   height: 100svh;
   width: 100%;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 78%, transparent 100%);
-          mask-image: linear-gradient(to bottom, black 0%, black 78%, transparent 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 5.5rem 1rem 1.5rem;
+  gap: 1.25rem;
 }
 
 .canvas-frame {
   position: relative;
   width: 100%;
-  height: 100%;
+  max-width: 560px;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: 14px;
   overflow: hidden;
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 24px 60px rgba(0, 0, 0, 0.55);
+  background: var(--bg-deep);
+  flex-shrink: 0;
 }
 
 .canvas-stage canvas {
@@ -171,6 +180,17 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* Mobile text region below the canvas */
+.canvas-text-region {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 30vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #coffee-canvas {
@@ -189,11 +209,11 @@
    ============================ */
 @media (min-width: 900px) {
   .canvas-stage {
-    -webkit-mask-image: none;
-            mask-image: none;
     height: 100vh;
     width: 100vw;
     padding: clamp(1rem, 4vw, 3rem);
+    gap: 0;
+    justify-content: center;
   }
 
   .canvas-frame {
@@ -220,6 +240,9 @@
     pointer-events: none;
     z-index: 6;
   }
+
+  /* Desktop hides the mobile text region (no overlay text below frame) */
+  .canvas-text-region { display: none; }
 
   /* Coffee section atmospheric bg + bokeh dots behind frame */
   .section-coffee {
@@ -408,7 +431,7 @@
 }
 
 /* ============================
-   MOBILE OVERLAY PANES
+   MOBILE OVERLAY PANES — live in the text region BELOW the canvas
    ============================ */
 .canvas-overlay-pane {
   position: absolute;
@@ -418,27 +441,25 @@
   justify-content: center;
   flex-direction: column;
   text-align: center;
-  padding: 0 1.5rem;
+  padding: 0.5rem 1.25rem;
   pointer-events: none;
   will-change: opacity, transform;
   z-index: 4;
 }
 
 .canvas-overlay-pane .eyebrow {
-  margin-bottom: 1.5rem;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.9rem;
 }
 
 .canvas-overlay-pane h1,
 .canvas-overlay-pane h2 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.4rem, 11vw, 4.5rem);
-  line-height: 1;
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+  line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--cream);
-  text-shadow: 0 6px 32px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.5);
-  max-width: 1100px;
+  max-width: 28ch;
 }
 .canvas-overlay-pane h1 .accent,
 .canvas-overlay-pane h2 .accent {
@@ -447,22 +468,25 @@
 }
 
 .canvas-overlay-pane p {
-  font-size: 0.95rem;
-  margin: 1.4rem auto 0;
-  max-width: 540px;
-  color: var(--cream);
-  line-height: 1.7;
-  letter-spacing: 0.02em;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85);
+  font-size: 0.9rem;
+  margin: 0.8rem auto 0;
+  max-width: 38ch;
+  color: var(--cream-dim);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 
 .canvas-overlay-pane .pane-cta {
-  margin-top: 2rem;
+  margin-top: 1.4rem;
   display: flex;
-  gap: 0.8rem;
+  gap: 0.6rem;
   justify-content: center;
   flex-wrap: wrap;
   pointer-events: auto;
+}
+.canvas-overlay-pane .pane-cta .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
 }
 
 /* ===========================================================
@@ -472,10 +496,6 @@
   padding: clamp(5rem, 12vw, 10rem) 1.5rem;
   position: relative;
   z-index: 2;
-  margin-top: -10vh;
-}
-@media (min-width: 900px) {
-  .story-section { margin-top: 0; }
 }
 
 .story-grid {
@@ -571,10 +591,6 @@
   padding: clamp(5rem, 12vw, 10rem) 1.5rem;
   position: relative;
   z-index: 2;
-  margin-top: -10vh;
-}
-@media (min-width: 900px) {
-  .menu-preview { margin-top: 0; }
 }
 
 .section-head {
@@ -663,13 +679,9 @@
   text-align: center;
   position: relative;
   z-index: 2;
-  margin-top: -5vh;
   background:
     radial-gradient(ellipse at center, rgba(201, 169, 97, 0.06), transparent 70%),
     var(--bg-base);
-}
-@media (min-width: 900px) {
-  .cta-section { margin-top: 0; }
 }
 
 .cta-inner { max-width: 800px; margin: 0 auto; }

@@ -274,11 +274,20 @@
       { at: 0.85, num: '04', label: 'The first sip' }
     ],
     panes: [
-      { selector: '[data-pane="hero-intro"]', out: [0.10, 0.40], yOut: 50 },
-      { selector: '[data-pane="hero-end"]',   in:  [0.70, 0.92], yIn: 40 },
-      { selector: '[data-pane="scroll-cue"]', out: [0.04, 0.14], yOut: 20 }
+      // intro stays through 0–10%, fades out 10–18%
+      { selector: '[data-pane="coffee-intro"]', out: [0.10, 0.18], yOut: 30 },
+      // pour: 18–22% in, 30–38% out
+      { selector: '[data-pane="coffee-pour"]',  in: [0.18, 0.24], out: [0.30, 0.38], yIn: 30, yOut: 30 },
+      // bloom: 40–46% in, 52–58% out
+      { selector: '[data-pane="coffee-bloom"]', in: [0.40, 0.46], out: [0.52, 0.58], yIn: 30, yOut: 30 },
+      // crema: 60–66% in, 72–78% out
+      { selector: '[data-pane="coffee-crema"]', in: [0.60, 0.66], out: [0.72, 0.78], yIn: 30, yOut: 30 },
+      // sip: 80–86% in, stays till end
+      { selector: '[data-pane="coffee-sip"]',   in: [0.80, 0.86], yIn: 30 },
+      // scroll cue fades out early
+      { selector: '[data-pane="scroll-cue"]',   out: [0.04, 0.14], yOut: 20 }
     ],
-    scrubLength: isDesktop ? '+=250%' : '+=350%',
+    scrubLength: isDesktop ? '+=250%' : '+=400%',
     vignetteRgba: 'rgba(7, 18, 9, 0.5)'
   });
 
@@ -303,15 +312,19 @@
       { at: 0.92, num: '05', label: 'The build' }
     ],
     panes: [
-      { selector: '[data-pane="burger-intro"]', out: [0.10, 0.40], yOut: 50 },
-      { selector: '[data-pane="burger-end"]',   in:  [0.72, 0.92], yIn: 40 }
+      { selector: '[data-pane="burger-intro"]',  out: [0.08, 0.15], yOut: 30 },
+      { selector: '[data-pane="burger-bun"]',    in: [0.15, 0.20], out: [0.27, 0.33], yIn: 30, yOut: 30 },
+      { selector: '[data-pane="burger-patty"]',  in: [0.34, 0.40], out: [0.46, 0.52], yIn: 30, yOut: 30 },
+      { selector: '[data-pane="burger-cheese"]', in: [0.53, 0.59], out: [0.64, 0.70], yIn: 30, yOut: 30 },
+      { selector: '[data-pane="burger-greens"]', in: [0.71, 0.77], out: [0.82, 0.88], yIn: 30, yOut: 30 },
+      { selector: '[data-pane="burger-build"]',  in: [0.89, 0.94], yIn: 30 }
     ],
-    scrubLength: isDesktop ? '+=250%' : '+=350%',
+    scrubLength: isDesktop ? '+=250%' : '+=400%',
     // Burger frames have a light gray studio bg.
-    // On mobile (full-bleed), tint heavily to match the dark green env.
-    // On desktop (contained frame), keep original mood — light bg looks great as a studio shot.
-    tintRgba: isDesktop ? null : 'rgba(20, 50, 26, 0.55)',
-    vignetteRgba: isDesktop ? 'rgba(0, 0, 0, 0.35)' : 'rgba(7, 18, 9, 0.55)'
+    // Mobile contained frame: keep tint subtle so colors remain vibrant in the small player.
+    // Desktop: keep original — looks like an intentional studio shot inside the framed widescreen.
+    tintRgba: isDesktop ? null : 'rgba(20, 50, 26, 0.30)',
+    vignetteRgba: isDesktop ? 'rgba(0, 0, 0, 0.35)' : 'rgba(7, 18, 9, 0.45)'
   });
 
   // -----------------------------
