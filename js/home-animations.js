@@ -52,173 +52,214 @@
   });
 
   // -----------------------------
-  // Coffee Frame Animation (canvas)
+  // Reusable Scroll-Driven Frame Animation
   // -----------------------------
-  const canvas = document.getElementById('coffee-canvas');
-  const ctx = canvas.getContext('2d');
-  const frameCount = 192;
-  const coffeeFrames = [];
-  const coffeeAnim = { frame: 0 };
-  let loaded = 0;
-  const loaderEl = document.getElementById('coffee-loader');
-  const loaderFill = document.getElementById('coffee-loader-fill');
-  const progressEl = document.getElementById('coffee-progress');
-  const stageEl = document.getElementById('coffee-stage');
+  function createFrameAnimation(config) {
+    const {
+      canvasId,
+      framesDir,
+      frameCount,
+      framePrefix = 'ezgif-frame-',
+      frameExt = 'jpg',
+      sectionSelector,
+      loaderId,
+      loaderFillId,
+      progressId,
+      stageId,
+      stageLabel = 'Chapter',
+      stages,
+      scrubLength = '+=250%',
+      vignetteRgba = 'rgba(7, 9, 10, 0.45)'
+    } = config;
 
-  // Stage labels — change as scroll progresses
-  const stages = [
-    { at: 0.0,  num: '01', label: 'The pour' },
-    { at: 0.30, num: '02', label: 'The bloom' },
-    { at: 0.60, num: '03', label: 'The crema' },
-    { at: 0.85, num: '04', label: 'The first sip' }
-  ];
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+    const frames = [];
+    const anim = { frame: 0 };
+    let loaded = 0;
 
-  function setCanvasSize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    // Cap internal resolution at native frame size (1280x720) to avoid pointless upscale
-    const NATIVE_W = 1280, NATIVE_H = 720;
-    const cssW = canvas.offsetWidth;
-    const cssH = canvas.offsetHeight;
-    const targetW = Math.min(cssW * dpr, NATIVE_W);
-    const targetH = Math.min(cssH * dpr, NATIVE_H);
-    canvas.width = targetW;
-    canvas.height = targetH;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    // Scale drawing ops to css pixel space
-    ctx.scale(targetW / cssW, targetH / cssH);
-    // Higher quality interpolation
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-  }
-  setCanvasSize();
-  window.addEventListener('resize', () => {
-    setCanvasSize();
-    renderCoffeeFrame();
-  });
+    const loaderEl = loaderId ? document.getElementById(loaderId) : null;
+    const loaderFill = loaderFillId ? document.getElementById(loaderFillId) : null;
+    const progressEl = progressId ? document.getElementById(progressId) : null;
+    const stageEl = stageId ? document.getElementById(stageId) : null;
 
-  // Preload — show progress
-  function imgLoaded() {
-    loaded++;
-    const pct = Math.round((loaded / frameCount) * 100);
-    if (loaderFill) loaderFill.style.width = pct + '%';
-    // Render first usable frame as soon as it arrives
-    if (loaded === 1 || loaded === Math.floor(frameCount / 4)) {
-      renderCoffeeFrame();
+    function setSize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const NATIVE_W = 1280, NATIVE_H = 720;
+      const cssW = canvas.offsetWidth;
+      const cssH = canvas.offsetHeight;
+      const targetW = Math.min(cssW * dpr, NATIVE_W);
+      const targetH = Math.min(cssH * dpr, NATIVE_H);
+      canvas.width = targetW;
+      canvas.height = targetH;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(targetW / cssW, targetH / cssH);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
     }
-    // Hide loader once enough frames are buffered
-    if (loaded >= Math.min(40, frameCount)) {
-      loaderEl && loaderEl.classList.add('hidden');
-    }
-  }
+    setSize();
+    window.addEventListener('resize', () => {
+      setSize();
+      render();
+    });
 
-  for (let i = 1; i <= frameCount; i++) {
-    const img = new Image();
-    img.onload = imgLoaded;
-    img.onerror = imgLoaded;
-    img.src = `images/coffee/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
-    coffeeFrames.push(img);
-  }
-
-  // Render a single frame with watermark crop + cinematic vignette
-  function renderCoffeeFrame() {
-    const idx = Math.min(frameCount - 1, Math.max(0, Math.round(coffeeAnim.frame)));
-    const img = coffeeFrames[idx];
-    const w = canvas.offsetWidth;
-    const h = canvas.offsetHeight;
-
-    if (!img || !img.complete || !img.naturalWidth) {
-      // Fall back to nearest loaded frame
-      let near = null;
-      for (let d = 1; d < frameCount; d++) {
-        const a = coffeeFrames[idx - d], b = coffeeFrames[idx + d];
-        if (a && a.complete && a.naturalWidth) { near = a; break; }
-        if (b && b.complete && b.naturalWidth) { near = b; break; }
+    function imgLoaded() {
+      loaded++;
+      const pct = Math.round((loaded / frameCount) * 100);
+      if (loaderFill) loaderFill.style.width = pct + '%';
+      if (loaded === 1 || loaded === Math.floor(frameCount / 4)) render();
+      if (loaded >= Math.min(40, frameCount)) {
+        loaderEl && loaderEl.classList.add('hidden');
       }
-      if (!near) return;
-      drawFrame(near, w, h);
-      return;
     }
-    drawFrame(img, w, h);
 
-    // Update progress text
-    if (progressEl) {
-      progressEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + frameCount;
+    for (let i = 1; i <= frameCount; i++) {
+      const img = new Image();
+      img.onload = imgLoaded;
+      img.onerror = imgLoaded;
+      img.src = `${framesDir}/${framePrefix}${String(i).padStart(3, '0')}.${frameExt}`;
+      frames.push(img);
     }
-  }
 
-  function drawFrame(img, w, h) {
-    ctx.clearRect(0, 0, w, h);
+    function drawFrame(img, w, h) {
+      ctx.clearRect(0, 0, w, h);
+      // Crop bottom 7% to remove "Veo" watermark
+      const cropBottom = Math.floor(img.naturalHeight * 0.07);
+      const sw = img.naturalWidth;
+      const sh = img.naturalHeight - cropBottom;
+      // Cover-fit (source aspect matches frame aspect)
+      const fillScale = Math.max(w / sw, h / sh);
+      const drawW = sw * fillScale;
+      const drawH = sh * fillScale;
+      const dx = (w - drawW) / 2;
+      const dy = (h - drawH) / 2;
+      ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
 
-    // Crop bottom strip (~7%) from source to remove "Veo" watermark
-    const cropBottom = Math.floor(img.naturalHeight * 0.07);
-    const sw = img.naturalWidth;
-    const sh = img.naturalHeight - cropBottom;
-
-    // Frame is 16:9, source is 16:9 — scale source to fully fill (no upscale beyond native)
-    const scale = Math.min(w / sw, h / sh);
-    // Use cover semantics so the frame is fully filled (slight overflow is fine since aspects match)
-    const fillScale = Math.max(w / sw, h / sh);
-    const drawW = sw * fillScale;
-    const drawH = sh * fillScale;
-    const dx = (w - drawW) / 2;
-    const dy = (h - drawH) / 2;
-
-    ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
-
-    // Soft edge vignette — adds depth without hiding the image
-    const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.55, w / 2, h / 2, Math.max(w, h) * 0.75);
-    grad.addColorStop(0, 'rgba(7, 9, 10, 0)');
-    grad.addColorStop(1, 'rgba(7, 9, 10, 0.45)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  // Update stage label based on progress
-  let currentStage = -1;
-  function updateStage(progress) {
-    let next = 0;
-    for (let i = stages.length - 1; i >= 0; i--) {
-      if (progress >= stages[i].at) { next = i; break; }
+      // Soft vignette
+      const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.55, w / 2, h / 2, Math.max(w, h) * 0.75);
+      grad.addColorStop(0, 'rgba(7, 9, 10, 0)');
+      grad.addColorStop(1, vignetteRgba);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
     }
-    if (next !== currentStage) {
-      currentStage = next;
-      const s = stages[next];
-      gsap.to(stageEl, {
-        opacity: 0, y: 10, duration: 0.3, ease: 'power2.in',
-        onComplete: () => {
-          stageEl.innerHTML = `<span class="num">Chapter ${s.num}</span>${s.label}`;
-          gsap.to(stageEl, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+
+    function render() {
+      const idx = Math.min(frameCount - 1, Math.max(0, Math.round(anim.frame)));
+      const img = frames[idx];
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      if (!img || !img.complete || !img.naturalWidth) {
+        let near = null;
+        for (let d = 1; d < frameCount; d++) {
+          const a = frames[idx - d], b = frames[idx + d];
+          if (a && a.complete && a.naturalWidth) { near = a; break; }
+          if (b && b.complete && b.naturalWidth) { near = b; break; }
         }
-      });
+        if (!near) return;
+        drawFrame(near, w, h);
+        return;
+      }
+      drawFrame(img, w, h);
+      if (progressEl) {
+        progressEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + frameCount;
+      }
     }
+
+    let currentStage = -1;
+    function updateStage(progress) {
+      if (!stageEl || !stages) return;
+      let next = 0;
+      for (let i = stages.length - 1; i >= 0; i--) {
+        if (progress >= stages[i].at) { next = i; break; }
+      }
+      if (next !== currentStage) {
+        currentStage = next;
+        const s = stages[next];
+        gsap.to(stageEl, {
+          opacity: 0, y: 10, duration: 0.3, ease: 'power2.in',
+          onComplete: () => {
+            stageEl.innerHTML = `<span class="num">${stageLabel} ${s.num}</span>${s.label}`;
+            gsap.to(stageEl, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
+          }
+        });
+      }
+    }
+
+    if (stageEl) gsap.set(stageEl, { opacity: 1, y: 0 });
+
+    gsap.to(anim, {
+      frame: frameCount - 1,
+      snap: 'frame',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: sectionSelector,
+        pin: true,
+        start: 'top top',
+        end: scrubLength,
+        scrub: 0.4,
+        onUpdate: (self) => updateStage(self.progress)
+      },
+      onUpdate: render
+    });
+
+    return { frames, render, anim, frameCount };
   }
 
-  // Initial stage visible
-  gsap.set(stageEl, { opacity: 1, y: 0 });
-
-  // Scroll-driven frame scrub
-  gsap.to(coffeeAnim, {
-    frame: frameCount - 1,
-    snap: 'frame',
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '.section-coffee',
-      pin: true,
-      start: 'top top',
-      end: '+=250%',
-      scrub: 0.4,
-      onUpdate: (self) => updateStage(self.progress)
-    },
-    onUpdate: renderCoffeeFrame
+  // -----------------------------
+  // Coffee animation
+  // -----------------------------
+  const coffeeAnim = createFrameAnimation({
+    canvasId: 'coffee-canvas',
+    framesDir: 'images/coffee',
+    frameCount: 192,
+    sectionSelector: '.section-coffee',
+    loaderId: 'coffee-loader',
+    loaderFillId: 'coffee-loader-fill',
+    progressId: 'coffee-progress',
+    stageId: 'coffee-stage',
+    stageLabel: 'Chapter',
+    stages: [
+      { at: 0.0,  num: '01', label: 'The pour' },
+      { at: 0.30, num: '02', label: 'The bloom' },
+      { at: 0.60, num: '03', label: 'The crema' },
+      { at: 0.85, num: '04', label: 'The first sip' }
+    ],
+    vignetteRgba: 'rgba(7, 9, 10, 0.45)'
   });
 
   // -----------------------------
-  // Story section — mini canvas mirrors the coffee frame
+  // Burger animation
+  // -----------------------------
+  createFrameAnimation({
+    canvasId: 'burger-canvas',
+    framesDir: 'images/burger',
+    frameCount: 192,
+    sectionSelector: '.section-burger',
+    loaderId: 'burger-loader',
+    loaderFillId: 'burger-loader-fill',
+    progressId: 'burger-progress',
+    stageId: 'burger-stage',
+    stageLabel: 'Layer',
+    stages: [
+      { at: 0.0,  num: '01', label: 'The bun' },
+      { at: 0.25, num: '02', label: 'The patty' },
+      { at: 0.50, num: '03', label: 'The cheese' },
+      { at: 0.75, num: '04', label: 'The greens' },
+      { at: 0.92, num: '05', label: 'The build' }
+    ],
+    vignetteRgba: 'rgba(0, 0, 0, 0.35)'
+  });
+
+  // -----------------------------
+  // Story section — mini canvas mirrors a coffee frame
   // -----------------------------
   const storyCanvas = document.getElementById('story-canvas');
-  if (storyCanvas) {
+  if (storyCanvas && coffeeAnim) {
     const sctx = storyCanvas.getContext('2d');
-    const storyAnim = { frame: 100 };
+    const storyState = { frame: 80 };
+    const coffeeFrames = coffeeAnim.frames;
+    const FC = coffeeAnim.frameCount;
 
     function sizeStoryCanvas() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -226,15 +267,14 @@
       storyCanvas.height = storyCanvas.offsetHeight * dpr;
       sctx.setTransform(1, 0, 0, 1, 0, 0);
       sctx.scale(dpr, dpr);
+      sctx.imageSmoothingEnabled = true;
+      sctx.imageSmoothingQuality = 'high';
     }
     sizeStoryCanvas();
-    window.addEventListener('resize', () => {
-      sizeStoryCanvas();
-      renderStoryFrame();
-    });
+    window.addEventListener('resize', () => { sizeStoryCanvas(); renderStoryFrame(); });
 
     function renderStoryFrame() {
-      const idx = Math.min(frameCount - 1, Math.max(0, Math.round(storyAnim.frame)));
+      const idx = Math.min(FC - 1, Math.max(0, Math.round(storyState.frame)));
       const img = coffeeFrames[idx];
       const w = storyCanvas.offsetWidth;
       const h = storyCanvas.offsetHeight;
@@ -251,7 +291,6 @@
       const dy = (h - drawH) / 2;
       sctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
 
-      // Subtle vignette
       const grad = sctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.4, w / 2, h / 2, Math.max(w, h) * 0.7);
       grad.addColorStop(0, 'rgba(7,9,10,0)');
       grad.addColorStop(1, 'rgba(7,9,10,0.5)');
@@ -259,9 +298,9 @@
       sctx.fillRect(0, 0, w, h);
     }
 
-    // Slow ambient loop for story canvas
-    gsap.to(storyAnim, {
-      frame: 220,
+    // Ambient loop (use mid-late frames where coffee is finished)
+    gsap.to(storyState, {
+      frame: FC - 10,
       duration: 18,
       repeat: -1,
       yoyo: true,
@@ -269,9 +308,8 @@
       onUpdate: renderStoryFrame
     });
 
-    // Try render once frames load
     const renderInterval = setInterval(() => {
-      if (coffeeFrames[100] && coffeeFrames[100].complete) {
+      if (coffeeFrames[80] && coffeeFrames[80].complete) {
         renderStoryFrame();
         clearInterval(renderInterval);
       }
@@ -332,7 +370,7 @@
   // -----------------------------
   // Dot navigation
   // -----------------------------
-  const sections = ['.hero', '.section-coffee', '.story-section', '.menu-preview', '.cta-section'];
+  const sections = ['.hero', '.section-coffee', '.story-section', '.section-burger', '.menu-preview', '.cta-section'];
   const dots = document.querySelectorAll('.dot-nav .dot');
   sections.forEach((sel, i) => {
     ScrollTrigger.create({

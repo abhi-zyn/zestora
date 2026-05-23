@@ -37,6 +37,7 @@
     <div class="dot active" data-target=".hero"></div>
     <div class="dot" data-target=".section-coffee"></div>
     <div class="dot" data-target=".story-section"></div>
+    <div class="dot" data-target=".section-burger"></div>
     <div class="dot" data-target=".menu-preview"></div>
     <div class="dot" data-target=".cta-section"></div>
   </div>
@@ -133,6 +134,37 @@
       <div class="story-visual">
         <span class="story-badge">House Pour</span>
         <canvas id="story-canvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- BURGER FRAME ANIMATION -->
+  <section class="section-burger">
+    <div class="burger-section-label"><span>The build</span></div>
+
+    <div class="burger-stage-frame">
+      <canvas id="burger-canvas"></canvas>
+
+      <div class="burger-loader" id="burger-loader">
+        <div class="coffee-loader-bar">
+          <div class="coffee-loader-fill" id="burger-loader-fill"></div>
+          <div class="coffee-loader-text">Stacking the layers…</div>
+        </div>
+      </div>
+
+      <div class="burger-overlay">
+        <div class="burger-overlay-top">
+          <div class="burger-stage" id="burger-stage">
+            <span class="num">Layer 01</span>
+            The bun
+          </div>
+        </div>
+        <div class="burger-overlay-bottom">
+          <div class="burger-tagline">
+            Hand-stacked, ingredient by ingredient.
+          </div>
+          <div class="burger-progress" id="burger-progress">00 / 192</div>
+        </div>
       </div>
     </div>
   </section>
