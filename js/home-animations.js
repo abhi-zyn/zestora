@@ -56,7 +56,7 @@
   // -----------------------------
   const canvas = document.getElementById('coffee-canvas');
   const ctx = canvas.getContext('2d');
-  const frameCount = 240;
+  const frameCount = 192;
   const coffeeFrames = [];
   const coffeeAnim = { frame: 0 };
   let loaded = 0;
