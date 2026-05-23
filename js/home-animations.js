@@ -1,5 +1,6 @@
 /* ===== Home Page — Cinematic Animations ===== */
 (function () {
+  const SCRUB = 0.8;
   const isMobile = window.innerWidth < 768;
 
   // -----------------------------
@@ -13,48 +14,11 @@
       nav.classList.toggle('scrolled', self.scroll() > 50);
     }
   });
-  nav.classList.add('visible');
 
   // -----------------------------
-  // Hero entrance
+  // Reusable Scroll-Driven Frame Animation Stage
   // -----------------------------
-  const heroTl = gsap.timeline({ delay: 0.2 });
-  heroTl
-    .from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out' })
-    .from('.hero-title', { opacity: 0, y: 50, duration: 1.2, ease: 'power4.out' }, '-=0.4')
-    .from('.hero-tagline', { opacity: 0, y: 20, duration: 0.9, ease: 'power3.out' }, '-=0.7')
-    .from('.hero-cta .btn', { opacity: 0, y: 20, stagger: 0.12, duration: 0.6, ease: 'power3.out' }, '-=0.5')
-    .from('.scroll-cue', { opacity: 0, duration: 0.8 }, '-=0.3');
-
-  // Bokeh idle drift
-  gsap.utils.toArray('.hero-bokeh').forEach((el, i) => {
-    gsap.to(el, {
-      x: (Math.random() - 0.5) * 60,
-      y: (Math.random() - 0.5) * 60,
-      duration: 8 + Math.random() * 4,
-      repeat: -1,
-      yoyo: true,
-      ease: 'sine.inOut',
-      delay: i * 0.5
-    });
-  });
-
-  // Hero parallax fade on scroll
-  gsap.to('.hero-content', {
-    y: -80,
-    opacity: 0,
-    scrollTrigger: {
-      trigger: '.hero',
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 1
-    }
-  });
-
-  // -----------------------------
-  // Reusable Scroll-Driven Frame Animation
-  // -----------------------------
-  function createFrameAnimation(config) {
+  function createCanvasStage(config) {
     const {
       canvasId,
       framesDir,
@@ -64,11 +28,9 @@
       sectionSelector,
       loaderId,
       loaderFillId,
-      progressId,
-      stageId,
-      stageLabel = 'Chapter',
-      stages,
-      scrubLength = '+=250%',
+      panes,           // [{ selector, in: [start,end], out:[start,end], yIn, yOut }]
+      scrubLength = '+=350%',
+      tintRgba,        // optional per-frame green tint overlay (for burger)
       vignetteRgba = 'rgba(7, 9, 10, 0.45)'
     } = config;
 
@@ -81,8 +43,6 @@
 
     const loaderEl = loaderId ? document.getElementById(loaderId) : null;
     const loaderFill = loaderFillId ? document.getElementById(loaderFillId) : null;
-    const progressEl = progressId ? document.getElementById(progressId) : null;
-    const stageEl = stageId ? document.getElementById(stageId) : null;
 
     function setSize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -99,10 +59,7 @@
       ctx.imageSmoothingQuality = 'high';
     }
     setSize();
-    window.addEventListener('resize', () => {
-      setSize();
-      render();
-    });
+    window.addEventListener('resize', () => { setSize(); render(); });
 
     function imgLoaded() {
       loaded++;
@@ -128,7 +85,6 @@
       const cropBottom = Math.floor(img.naturalHeight * 0.07);
       const sw = img.naturalWidth;
       const sh = img.naturalHeight - cropBottom;
-      // Cover-fit (source aspect matches frame aspect)
       const fillScale = Math.max(w / sw, h / sh);
       const drawW = sw * fillScale;
       const drawH = sh * fillScale;
@@ -136,9 +92,18 @@
       const dy = (h - drawH) / 2;
       ctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
 
+      // Optional color tint to unify against the dark green theme
+      if (tintRgba) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = tintRgba;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+
       // Soft vignette
       const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.55, w / 2, h / 2, Math.max(w, h) * 0.75);
-      grad.addColorStop(0, 'rgba(7, 9, 10, 0)');
+      grad.addColorStop(0, 'rgba(13, 31, 15, 0)');
       grad.addColorStop(1, vignetteRgba);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
@@ -161,32 +126,50 @@
         return;
       }
       drawFrame(img, w, h);
-      if (progressEl) {
-        progressEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + frameCount;
-      }
     }
 
-    let currentStage = -1;
-    function updateStage(progress) {
-      if (!stageEl || !stages) return;
-      let next = 0;
-      for (let i = stages.length - 1; i >= 0; i--) {
-        if (progress >= stages[i].at) { next = i; break; }
-      }
-      if (next !== currentStage) {
-        currentStage = next;
-        const s = stages[next];
-        gsap.to(stageEl, {
-          opacity: 0, y: 10, duration: 0.3, ease: 'power2.in',
-          onComplete: () => {
-            stageEl.innerHTML = `<span class="num">${stageLabel} ${s.num}</span>${s.label}`;
-            gsap.to(stageEl, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' });
-          }
-        });
-      }
+    // Resolve pane DOM elements once
+    const paneEls = (panes || []).map(p => ({
+      ...p,
+      el: document.querySelector(p.selector)
+    })).filter(p => p.el);
+
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+    function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+    function updatePanes(progress) {
+      paneEls.forEach(p => {
+        let opacity = 0;
+        let y = 0;
+        if (p.in && progress >= p.in[0] && progress <= p.in[1]) {
+          // Fade-in within this range
+          const t = smoothstep((progress - p.in[0]) / (p.in[1] - p.in[0]));
+          opacity = t;
+          y = (1 - t) * (p.yIn ?? 40);
+        } else if (p.in && progress > p.in[1] && (!p.out || progress < p.out[0])) {
+          opacity = 1; y = 0;
+        }
+        if (p.out && progress >= p.out[0] && progress <= p.out[1]) {
+          const t = smoothstep((progress - p.out[0]) / (p.out[1] - p.out[0]));
+          opacity = 1 - t;
+          y = -t * (p.yOut ?? 60);
+        } else if (p.out && progress > p.out[1]) {
+          opacity = 0; y = -(p.yOut ?? 60);
+        }
+        // If only `out` defined, start visible
+        if (!p.in && p.out && progress < p.out[0]) { opacity = 1; y = 0; }
+
+        p.el.style.opacity = opacity.toFixed(3);
+        p.el.style.transform = `translateY(${y}px)`;
+      });
     }
 
-    if (stageEl) gsap.set(stageEl, { opacity: 1, y: 0 });
+    // Initial pane state — first pane visible, rest hidden
+    paneEls.forEach((p, i) => {
+      if (i === 0 && !p.in) { p.el.style.opacity = '1'; p.el.style.transform = 'translateY(0)'; }
+      else if (!p.in) { p.el.style.opacity = '1'; p.el.style.transform = 'translateY(0)'; }
+      else { p.el.style.opacity = '0'; }
+    });
 
     gsap.to(anim, {
       frame: frameCount - 1,
@@ -197,8 +180,8 @@
         pin: true,
         start: 'top top',
         end: scrubLength,
-        scrub: 0.4,
-        onUpdate: (self) => updateStage(self.progress)
+        scrub: SCRUB,
+        onUpdate: (self) => updatePanes(self.progress)
       },
       onUpdate: render
     });
@@ -207,52 +190,51 @@
   }
 
   // -----------------------------
-  // Coffee animation
+  // Coffee stage (hero merges in here)
+  //   Pane 1 (hero intro):  visible 0–0.10, fades out 0.10–0.40
+  //   Pane 2 (hero end):    fades in 0.70–0.92
+  //   Scroll cue:           visible at start, fades out 0.05–0.15
   // -----------------------------
-  const coffeeAnim = createFrameAnimation({
+  const coffeeAnim = createCanvasStage({
     canvasId: 'coffee-canvas',
     framesDir: 'images/coffee',
     frameCount: 192,
-    sectionSelector: '.section-coffee',
+    sectionSelector: '.canvas-stage--hero',
     loaderId: 'coffee-loader',
     loaderFillId: 'coffee-loader-fill',
-    progressId: 'coffee-progress',
-    stageId: 'coffee-stage',
-    stageLabel: 'Chapter',
-    stages: [
-      { at: 0.0,  num: '01', label: 'The pour' },
-      { at: 0.30, num: '02', label: 'The bloom' },
-      { at: 0.60, num: '03', label: 'The crema' },
-      { at: 0.85, num: '04', label: 'The first sip' }
+    scrubLength: '+=350%',
+    panes: [
+      { selector: '[data-pane="hero-intro"]', out: [0.10, 0.40], yOut: 50 },
+      { selector: '[data-pane="hero-end"]',   in:  [0.70, 0.92], yIn: 40 },
+      { selector: '[data-pane="scroll-cue"]', out: [0.04, 0.14], yOut: 20 }
     ],
-    vignetteRgba: 'rgba(7, 9, 10, 0.45)'
+    vignetteRgba: 'rgba(7, 18, 9, 0.5)'
   });
 
   // -----------------------------
-  // Burger animation
+  // Burger stage — same structure
+  //   Pane 1 (burger intro): visible 0–0.10, fades out 0.10–0.40
+  //   Pane 2 (burger end):   fades in 0.72–0.92
+  //   Tint: dark green multiply to match coffee mood
   // -----------------------------
-  createFrameAnimation({
+  createCanvasStage({
     canvasId: 'burger-canvas',
     framesDir: 'images/burger',
     frameCount: 192,
-    sectionSelector: '.section-burger',
+    sectionSelector: '.canvas-stage--burger',
     loaderId: 'burger-loader',
     loaderFillId: 'burger-loader-fill',
-    progressId: 'burger-progress',
-    stageId: 'burger-stage',
-    stageLabel: 'Layer',
-    stages: [
-      { at: 0.0,  num: '01', label: 'The bun' },
-      { at: 0.25, num: '02', label: 'The patty' },
-      { at: 0.50, num: '03', label: 'The cheese' },
-      { at: 0.75, num: '04', label: 'The greens' },
-      { at: 0.92, num: '05', label: 'The build' }
+    scrubLength: '+=350%',
+    panes: [
+      { selector: '[data-pane="burger-intro"]', out: [0.10, 0.40], yOut: 50 },
+      { selector: '[data-pane="burger-end"]',   in:  [0.72, 0.92], yIn: 40 }
     ],
-    vignetteRgba: 'rgba(0, 0, 0, 0.35)'
+    tintRgba: 'rgba(20, 50, 26, 0.55)',
+    vignetteRgba: 'rgba(7, 18, 9, 0.55)'
   });
 
   // -----------------------------
-  // Story section — mini canvas mirrors a coffee frame
+  // Story-section mini canvas (uses coffee frames)
   // -----------------------------
   const storyCanvas = document.getElementById('story-canvas');
   if (storyCanvas && coffeeAnim) {
@@ -271,15 +253,14 @@
       sctx.imageSmoothingQuality = 'high';
     }
     sizeStoryCanvas();
-    window.addEventListener('resize', () => { sizeStoryCanvas(); renderStoryFrame(); });
+    window.addEventListener('resize', () => { sizeStoryCanvas(); renderStory(); });
 
-    function renderStoryFrame() {
+    function renderStory() {
       const idx = Math.min(FC - 1, Math.max(0, Math.round(storyState.frame)));
       const img = coffeeFrames[idx];
       const w = storyCanvas.offsetWidth;
       const h = storyCanvas.offsetHeight;
       if (!img || !img.complete || !img.naturalWidth) return;
-
       sctx.clearRect(0, 0, w, h);
       const cropBottom = Math.floor(img.naturalHeight * 0.07);
       const sw = img.naturalWidth;
@@ -290,34 +271,66 @@
       const dx = (w - drawW) / 2;
       const dy = (h - drawH) / 2;
       sctx.drawImage(img, 0, 0, sw, sh, dx, dy, drawW, drawH);
-
       const grad = sctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.4, w / 2, h / 2, Math.max(w, h) * 0.7);
-      grad.addColorStop(0, 'rgba(7,9,10,0)');
-      grad.addColorStop(1, 'rgba(7,9,10,0.5)');
+      grad.addColorStop(0, 'rgba(13,31,15,0)');
+      grad.addColorStop(1, 'rgba(13,31,15,0.5)');
       sctx.fillStyle = grad;
       sctx.fillRect(0, 0, w, h);
     }
 
-    // Ambient loop (use mid-late frames where coffee is finished)
     gsap.to(storyState, {
       frame: FC - 10,
       duration: 18,
       repeat: -1,
       yoyo: true,
       ease: 'sine.inOut',
-      onUpdate: renderStoryFrame
+      onUpdate: renderStory
     });
 
     const renderInterval = setInterval(() => {
       if (coffeeFrames[80] && coffeeFrames[80].complete) {
-        renderStoryFrame();
+        renderStory();
         clearInterval(renderInterval);
       }
     }, 200);
   }
 
   // -----------------------------
-  // Story text reveal
+  // Section transitions — outgoing scale+fade, incoming translate+fade
+  // Applied to non-pinned sections (story, menu, cta)
+  // -----------------------------
+  const transitionSections = gsap.utils.toArray('.section-transition');
+  transitionSections.forEach((sec) => {
+    // Incoming: translateY 60 → 0, opacity 0 → 1
+    gsap.fromTo(sec,
+      { y: 60, opacity: 0 },
+      {
+        y: 0, opacity: 1, ease: 'none',
+        scrollTrigger: {
+          trigger: sec,
+          start: 'top bottom',
+          end: 'top 60%',
+          scrub: 1
+        }
+      }
+    );
+    // Outgoing: scale 1 → 0.95, opacity 1 → 0
+    gsap.fromTo(sec,
+      { scale: 1, opacity: 1 },
+      {
+        scale: 0.95, opacity: 0, ease: 'none',
+        scrollTrigger: {
+          trigger: sec,
+          start: 'bottom 80%',
+          end: 'bottom top',
+          scrub: 1
+        }
+      }
+    );
+  });
+
+  // -----------------------------
+  // Story text + visual reveal (subtle)
   // -----------------------------
   gsap.from('.story-text > *', {
     opacity: 0,
@@ -370,7 +383,7 @@
   // -----------------------------
   // Dot navigation
   // -----------------------------
-  const sections = ['.hero', '.section-coffee', '.story-section', '.section-burger', '.menu-preview', '.cta-section'];
+  const sections = ['.canvas-stage--hero', '.story-section', '.canvas-stage--burger', '.menu-preview', '.cta-section'];
   const dots = document.querySelectorAll('.dot-nav .dot');
   sections.forEach((sel, i) => {
     ScrollTrigger.create({
@@ -403,16 +416,4 @@
       gsap.to(progressBar, { scaleX: self.progress, duration: 0.1, ease: 'none' });
     }
   });
-
-  // -----------------------------
-  // Mobile menu toggle
-  // -----------------------------
-  const hamburger = document.querySelector('.hamburger');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-    mobileMenu.querySelectorAll('a').forEach(a =>
-      a.addEventListener('click', () => mobileMenu.classList.remove('open'))
-    );
-  }
 })();

@@ -1,39 +1,17 @@
 /* ===== Lenis + GSAP Smooth Scroll Integration ===== */
 (function() {
+  const isMobile = window.innerWidth < 768;
+
   const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    touchMultiplier: 2,
-    smoothWheel: true
+    lerp: isMobile ? 0.12 : 0.08,
+    smoothWheel: true,
+    touchMultiplier: 1.6,
+    wheelMultiplier: 1
   });
 
   lenis.on('scroll', ScrollTrigger.update);
-
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
+  gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
-
-  // Scroll progress bar
-  const progressBar = document.querySelector('.scroll-progress');
-  if (progressBar) {
-    gsap.to(progressBar, {
-      scaleX: 1,
-      ease: 'none',
-      scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 }
-    });
-  }
-
-  // Nav visibility
-  const nav = document.querySelector('.nav');
-  if (nav) {
-    ScrollTrigger.create({
-      start: 'top -100',
-      onUpdate: (self) => {
-        nav.classList.toggle('visible', self.progress > 0);
-      }
-    });
-  }
 
   // Page transitions
   document.querySelectorAll('a[href]').forEach(link => {

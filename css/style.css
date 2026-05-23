@@ -1,12 +1,12 @@
 /* ===== Zestora — Cinematic Coffee Theme ===== */
 :root {
-  /* Deep moody base */
-  --bg-void: #07090a;
-  --bg-base: #0c100e;
-  --bg-elevated: #131815;
-  --bg-card: #181f1c;
-  --surface: rgba(255, 248, 230, 0.04);
-  --surface-hover: rgba(255, 248, 230, 0.07);
+  /* One continuous dark forest atmosphere */
+  --bg-base: #0d1f0f;
+  --bg-deep: #0a1a0c;
+  --bg-elevated: #122515;
+  --bg-card: #16291a;
+  --surface: rgba(245, 232, 211, 0.04);
+  --surface-hover: rgba(245, 232, 211, 0.07);
   --hairline: rgba(245, 232, 211, 0.08);
   --hairline-strong: rgba(245, 232, 211, 0.18);
 
@@ -19,9 +19,8 @@
   --copper: #d97742;
   --espresso: #3d2818;
 
-  /* Forest greens echoing the imagery */
-  --green-deep: #1a2e22;
-  --green-mid: #2d4a37;
+  --green-deep: #0d1f0f;
+  --green-mid: #1a3a22;
   --green-glow: #4a7a5a;
 
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -42,14 +41,16 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body {
+  background: var(--bg-base);
+}
+
 html {
   scroll-behavior: auto;
-  background: var(--bg-void);
 }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg-base);
   color: var(--cream);
   overflow-x: hidden;
   line-height: 1.6;
@@ -62,7 +63,7 @@ a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 img { max-width: 100%; display: block; }
 
-::selection { background: var(--gold); color: var(--bg-void); }
+::selection { background: var(--gold); color: var(--bg-deep); }
 
 /* Display headings */
 h1, h2, h3, .display {
@@ -72,27 +73,23 @@ h1, h2, h3, .display {
   line-height: 1.05;
 }
 
-/* Subtle film-grain overlay for texture */
-body::before {
-  content: '';
+/* Cinematic film grain overlay — ties all sections into one mood */
+.grain-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.04;
+  opacity: 0.035;
   mix-blend-mode: overlay;
-  background-image:
-    radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px),
-    radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px);
-  background-size: 3px 3px, 7px 7px;
-  background-position: 0 0, 1px 2px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.7 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
 }
 
 /* Page transition overlay */
 .page-transition {
   position: fixed;
   inset: 0;
-  background: var(--bg-void);
+  background: var(--bg-deep);
   z-index: 9999;
   transform: scaleY(0);
   transform-origin: bottom;
@@ -118,7 +115,7 @@ body::before {
   box-shadow: var(--shadow-md);
 }
 
-/* Navigation */
+/* Navigation — fully transparent floating glass over canvas */
 .nav {
   position: fixed;
   top: 0;
@@ -130,12 +127,12 @@ body::before {
   align-items: center;
   justify-content: space-between;
   transition: var(--transition);
-  background: linear-gradient(180deg, rgba(7, 9, 10, 0.9) 0%, rgba(7, 9, 10, 0) 100%);
-  backdrop-filter: blur(0px);
+  background: transparent;
 }
 .nav.scrolled {
-  background: rgba(7, 9, 10, 0.85);
-  backdrop-filter: blur(16px);
+  background: rgba(13, 31, 15, 0.5);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
   border-bottom: 1px solid var(--hairline);
   padding: 0.85rem 2rem;
 }
@@ -149,6 +146,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 .nav-logo::before {
   content: '';
@@ -173,6 +171,7 @@ body::before {
   color: var(--cream-dim);
   position: relative;
   transition: var(--transition);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 .nav-links a:hover { color: var(--gold-bright); }
 .nav-links a::after {
@@ -203,7 +202,7 @@ body::before {
 .mobile-menu {
   position: fixed;
   inset: 0;
-  background: var(--bg-void);
+  background: var(--bg-deep);
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -236,7 +235,7 @@ body::before {
 
 /* Footer */
 .footer {
-  background: var(--bg-void);
+  background: var(--bg-deep);
   color: var(--cream);
   padding: 5rem 2rem 2rem;
   border-top: 1px solid var(--hairline);
@@ -315,7 +314,7 @@ body::before {
 
 .btn-primary {
   background: var(--gold);
-  color: var(--bg-void);
+  color: var(--bg-deep);
 }
 .btn-primary:hover {
   background: var(--gold-bright);
@@ -324,7 +323,8 @@ body::before {
 }
 
 .btn-outline {
-  background: transparent;
+  background: rgba(13, 31, 15, 0.3);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--hairline-strong);
   color: var(--cream);
 }
@@ -342,7 +342,6 @@ body::before {
 }
 .btn-ghost:hover { color: var(--gold-bright); }
 
-/* Section eyebrow / labels */
 .eyebrow {
   display: inline-flex;
   align-items: center;
