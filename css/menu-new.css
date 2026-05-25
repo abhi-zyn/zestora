@@ -251,7 +251,7 @@ body {
 .menu-card-plate {
   width: 100px; height: 100px;
   margin: 0 auto 0.7rem;
-  border-radius: 50%;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -355,7 +355,7 @@ body {
 }
 .detail-plate {
   width: 200px; height: 200px;
-  border-radius: 50%;
+  border-radius: 14px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 12px 36px rgba(46, 125, 50, 0.25);
