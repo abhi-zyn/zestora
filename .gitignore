@@ -1,3 +1,7 @@
 # Source videos (frames are committed; original videos are not)
 Video/
 *.mp4
+
+# Local image backups (do not commit)
+images/*.backup/
+images/**/*.backup/

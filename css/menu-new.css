@@ -247,19 +247,22 @@ body {
   background: none; border: none; cursor: pointer;
   z-index: 2;
 }
-/* Plate frame: circular clip that hides the dish-name text baked into source images */
+/* Plate frame: true circular plate */
 .menu-card-plate {
-  width: 100px; height: 100px;
+  width: 120px; height: 120px;
   margin: 0 auto 0.7rem;
-  border-radius: 12px;
+  border-radius: 50%;
   overflow: hidden;
   position: relative;
   z-index: 1;
   background: #fff;
   box-shadow: 0 8px 18px rgba(27, 94, 32, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .menu-card-img {
-  width: 100%; height: 100%;
+  width: 92%; height: 92%;
   object-fit: contain;
   display: block;
   transform-origin: center center;
@@ -353,14 +356,17 @@ body {
   margin-bottom: 1.5rem;
 }
 .detail-plate {
-  width: 200px; height: 200px;
-  border-radius: 14px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 12px 36px rgba(46, 125, 50, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .detail-image {
-  width: 100%; height: 100%;
+  width: 92%; height: 92%;
   object-fit: contain;
   display: block;
   transform-origin: center center;
